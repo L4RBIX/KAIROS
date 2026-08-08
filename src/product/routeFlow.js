@@ -40,7 +40,6 @@ export class RouteFlow {
         this.onResult = null;
 
         this.shell.onAnalyze = (route) => this.run(route);
-        this.shell.el.back.addEventListener("click", () => this.reset());
 
         this.shell.el.time.addEventListener("input", (e) => {
             if (!this.route) return;
@@ -122,11 +121,25 @@ export class RouteFlow {
         this._after(T_RESULT, () => {
             this.shell.showResult(prediction, route);
             this.shell.setScrubTime(route.departure);
-            this.shell.setStatus(
-                `${route.label} · departing ${route.departure}`
-            );
+            const title = route.journeyLabel || route.label;
+            this.shell.setStatus(`${title} · departing ${route.departure}`);
             this.onResult?.(prediction, route);
         });
+    }
+
+    /** Soft reset before reopening the map planner — keeps cinematic calm. */
+    prepareForMap() {
+        this.cancel();
+        this.current = null;
+        this.scrubClock = null;
+        this.shell.closeCopilot();
+        this.shell.setView("hold");
+        this.camera.cut("landing", 2.4);
+        this.weather.setTarget(weatherFor({
+            risk: 0.12, windSpeed: 4, snowfall: 0.3,
+            visibility: 860, temperature: -9,
+            winterHazardActive: true,
+        }));
     }
 
     /**

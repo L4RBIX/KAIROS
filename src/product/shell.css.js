@@ -230,6 +230,30 @@ export const CSS = `
 .b-go[disabled]:hover::after { transform: scaleX(0); }
 .b-go[disabled]:hover { color: var(--b-frost); border-color: var(--b-line); }
 
+.b-text-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 18px 0 0;
+    color: var(--b-faint);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 280ms var(--b-ease);
+}
+.b-text-link:hover { color: var(--b-frost); }
+
+.b-live-fields {
+    margin-top: clamp(22px, 2.8vw, 36px);
+    padding-top: clamp(18px, 2vw, 28px);
+    border-top: 1px solid rgba(232, 240, 248, 0.1);
+}
+.b-live-fields[hidden] { display: none !important; }
+.b-live-fields .b-go { margin-top: 4px; }
+
 /* ------------------------------------------------------------------ result */
 
 /* The form and the result occupy the same corner. Neither is ever laid out

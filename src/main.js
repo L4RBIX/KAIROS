@@ -225,13 +225,14 @@ async function boot() {
     const replay = new Replay({ shell, weather, camera: rig });
 
     /** @type {"map"|"cinematic"} */
-    let appMode = "map";
+    let appMode = "cinematic";
     /** @type {JourneyMap|null} */
     let journeyMap = null;
 
     const setMode = (mode) => {
         appMode = mode;
         if (mode === "map") {
+            // Pause heavy WebGPU while the planner is open.
             canvas.style.visibility = "hidden";
             shell.root.style.visibility = "hidden";
             shell.root.style.pointerEvents = "none";
@@ -252,19 +253,28 @@ async function boot() {
             flow.run({
                 segmentId: q.segmentId,
                 label: q.label,
+                journeyLabel: q.journeyLabel,
                 departure: q.departure,
             });
+        },
+        onClose: () => {
+            setMode("cinematic");
+            shell.reveal();
+            flow.reset();
         },
         onWinterScenario: () => {
             setMode("cinematic");
             shell.reveal();
-            // Show result shell chrome then start illustrative replay.
             shell.setView("result");
             shell.replayEl.start?.click();
         },
     });
+    shell.onPlanJourney = () => {
+        flow.prepareForMap();
+        setMode("map");
+    };
     shell.onBackToMap = () => {
-        flow.reset();
+        flow.prepareForMap();
         setMode("map");
     };
 
@@ -379,8 +389,9 @@ async function boot() {
     });
 
     await journeyMap.init();
-    // Start on the national map; cinematic WebGPU waits until Explore.
-    setMode("map");
+    // Hero default: cinematic WebGPU. Map is a temporary planning tool.
+    setMode("cinematic");
+    shell.reveal();
 
     await loading.done();
     setTimeout(() => overlay.resetSpikes(), 800);

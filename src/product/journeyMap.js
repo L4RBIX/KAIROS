@@ -20,10 +20,10 @@ const CSS = `
 #kairos-map {
     position: fixed; inset: 0; z-index: 30;
     background: #070b12;
-    opacity: 0; pointer-events: none;
+    opacity: 0; pointer-events: none; visibility: hidden;
     transition: opacity 700ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-#kairos-map.active { opacity: 1; pointer-events: auto; }
+#kairos-map.active { opacity: 1; pointer-events: auto; visibility: visible; }
 #kairos-map .maplibregl-map { font: inherit; }
 #kairos-map .maplibregl-ctrl-attrib {
     background: transparent !important; color: rgba(232,240,248,0.35);
@@ -48,6 +48,17 @@ const CSS = `
     pointer-events: none;
 }
 .jm-ui * { pointer-events: auto; }
+.jm-top {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 16px; pointer-events: none;
+}
+.jm-top * { pointer-events: auto; }
+.jm-close {
+    background: none; border: 0; padding: 0; cursor: pointer;
+    color: rgba(232,240,248,0.45); font: inherit;
+    font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase;
+}
+.jm-close:hover { color: #e8f0f8; }
 .jm-brand {
     font-size: 13px; font-weight: 500; letter-spacing: 0.52em; text-indent: 0.52em;
 }
@@ -158,17 +169,23 @@ export class JourneyMap {
     /**
      * @param {{
      *   onExplore: (q: {segmentId:string,label:string,departure:string,journeyLabel:string}) => void,
+     *   onClose?: () => void,
      *   onWinterScenario?: () => void,
      * }} opts
      */
     constructor(opts) {
         this.onExplore = opts.onExplore;
+        this.onClose = opts.onClose || null;
         this.onWinterScenario = opts.onWinterScenario || null;
         this.active = false;
         this.map = null;
         this.segments = [];
         this.analysis = null;
         this.route = null;
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        this._enterTimer = null;
+        /** @type {ReturnType<typeof setTimeout>|null} */
+        this._hideTimer = null;
 
         const style = document.createElement("style");
         style.textContent = CSS;
@@ -179,9 +196,12 @@ export class JourneyMap {
         this.root.innerHTML = `
             <div id="jm-canvas" style="position:absolute;inset:0;"></div>
             <div class="jm-ui">
-                <div class="jm-brand">KAIROS</div>
+                <div class="jm-top">
+                    <div class="jm-brand">KAIROS</div>
+                    <button class="jm-close" id="jm-close" type="button">Back to road</button>
+                </div>
                 <div class="jm-card">
-                    <div class="jm-kicker">Kazakhstan journey map</div>
+                    <div class="jm-kicker">Route planner</div>
                     <div class="jm-fields">
                         <div class="jm-field">
                             <label for="jm-from">From</label>
@@ -220,7 +240,7 @@ export class JourneyMap {
                             <button class="jm-chip" data-act="ask" type="button">Ask KAIROS</button>
                         </div>
                         <button class="jm-explore" id="jm-explore" type="button" disabled>
-                            Explore conditions
+                            Enter road view
                         </button>
                         <button class="jm-winter" id="jm-winter" type="button">
                             Illustrative winter scenario
@@ -236,6 +256,7 @@ export class JourneyMap {
             to: this.root.querySelector("#jm-to"),
             depart: this.root.querySelector("#jm-depart"),
             analyze: this.root.querySelector("#jm-analyze"),
+            close: this.root.querySelector("#jm-close"),
             status: this.root.querySelector("#jm-status"),
             result: this.root.querySelector("#jm-result"),
             route: this.root.querySelector("#jm-route"),
@@ -263,6 +284,7 @@ export class JourneyMap {
 
         this.el.analyze.addEventListener("click", () => this.analyze());
         this.el.explore.addEventListener("click", () => this.explore());
+        this.el.close.addEventListener("click", () => this.onClose?.());
         this.el.winter.addEventListener("click", () => this.onWinterScenario?.());
         this.root.querySelectorAll(".jm-chip").forEach((btn) => {
             btn.addEventListener("click", () => this.intelAction(btn.getAttribute("data-act")));
@@ -338,15 +360,32 @@ export class JourneyMap {
 
     show() {
         this.active = true;
+        if (this._hideTimer) {
+            clearTimeout(this._hideTimer);
+            this._hideTimer = null;
+        }
+        this.root.style.visibility = "visible";
         this.root.classList.add("active");
-        // Resume map paint
-        this.map?.resize();
-        try { this.map?.triggerRepaint(); } catch { /* */ }
+        // Resume map paint after the fade-in.
+        requestAnimationFrame(() => {
+            this.map?.resize();
+            try { this.map?.triggerRepaint(); } catch { /* */ }
+        });
     }
 
     hide() {
         this.active = false;
         this.root.classList.remove("active");
+        if (this._enterTimer) {
+            clearTimeout(this._enterTimer);
+            this._enterTimer = null;
+        }
+        // After the opacity transition, drop visibility so MapLibre idles.
+        if (this._hideTimer) clearTimeout(this._hideTimer);
+        this._hideTimer = setTimeout(() => {
+            if (!this.active) this.root.style.visibility = "hidden";
+            this._hideTimer = null;
+        }, 720);
     }
 
     _setStatus(text, err = false) {
@@ -498,7 +537,21 @@ export class JourneyMap {
                 this.el.intel.textContent =
                     "Route analysis ready. AI briefing temporarily unavailable.";
             }
-            this._setStatus("");
+
+            // Premium handoff: brief map settle, then return to the cinematic road.
+            if (highest) {
+                this._setStatus("Entering road conditions");
+                if (this._enterTimer) clearTimeout(this._enterTimer);
+                this._enterTimer = setTimeout(() => {
+                    this._enterTimer = null;
+                    this.explore();
+                }, 1100);
+            } else {
+                this._setStatus(
+                    "No trained corridor on this route · stay for weather-only notes, or pick another journey",
+                    true,
+                );
+            }
         } catch (err) {
             console.warn("[kairos] journey analyze failed", err);
             this._setStatus("Journey analysis unavailable", true);

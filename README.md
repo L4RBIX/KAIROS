@@ -58,14 +58,15 @@ illustrative winter scenario — not claimed as a real labelled closure.
 
 ### Journey map
 
-The product opens on an interactive Kazakhstan map (MapLibre). Choose From/To
-cities, analyze the journey, and see **approximate** model coverage around the
-seven trained corridor midpoints. Only matched trained segments receive
-LightGBM risk — arbitrary roads stay weather-only / not yet trained.
+The default experience is the cinematic WebGPU road. **Plan journey** opens a
+temporary Kazakhstan map (MapLibre) for From/To selection, route drawing, and
+**approximate** model coverage around the seven trained corridor midpoints.
+Only matched trained segments receive LightGBM risk — arbitrary roads stay
+weather-only / not yet trained.
 
-**Explore conditions** opens the existing WebGPU scene as a representative
-conditions view for the highest-risk covered segment (not a geographic twin of
-the whole route).
+**Analyze journey** returns to the WebGPU scene with risk/weather for the
+highest-risk covered segment (not a geographic twin of the whole route).
+**Change route** reopens the planner.
 
 ### KAIROS Copilot (DeepSeek)
 

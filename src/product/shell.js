@@ -23,6 +23,9 @@ export class Shell {
             segment: root.querySelector("#b-segment"),
             depart: root.querySelector("#b-depart"),
             go: root.querySelector("#b-go"),
+            plan: root.querySelector("#b-plan"),
+            liveToggle: root.querySelector("#b-live-toggle"),
+            liveFields: root.querySelector("#b-live-fields"),
             loc: root.querySelector("#b-loc"),
             form: root.querySelector("#b-form"),
             result: root.querySelector("#b-result"),
@@ -34,6 +37,7 @@ export class Shell {
             advice: root.querySelector("#b-advice"),
             adviceTime: root.querySelector("#b-advice-time"),
             back: root.querySelector("#b-back"),
+            why: root.querySelector("#b-why"),
             time: root.querySelector("#b-time"),
             timeRead: root.querySelector("#b-time-read"),
             mode: root.querySelector("#b-mode"),
@@ -43,7 +47,6 @@ export class Shell {
             metVis: root.querySelector("#b-met-vis"),
             metTemp: root.querySelector("#b-met-temp"),
             winterCta: root.querySelector("#b-winter-cta"),
-            backToMap: root.querySelector("#b-map"),
             scoreNote: root.querySelector("#b-score-note"),
             copilot: root.querySelector("#b-copilot"),
             copilotToggle: root.querySelector("#b-ask"),
@@ -89,6 +92,8 @@ export class Shell {
 
         /** @type {((r: {segmentId:string, label:string, departure:string}) => void)|null} */
         this.onAnalyze = null;
+        /** @type {(() => void)|null} */
+        this.onPlanJourney = null;
         /** @type {((message: string, extras?: object) => void)|null} */
         this.onCopilotAsk = null;
         /** @type {(() => void)|null} */
@@ -96,9 +101,19 @@ export class Shell {
         /** @type {(() => void)|null} */
         this.onBackToMap = null;
 
-        this.el.go.addEventListener("click", () => this.onAnalyze?.(this.route()));
+        this.el.plan?.addEventListener("click", () => this.onPlanJourney?.());
+        this.el.go?.addEventListener("click", () => this.onAnalyze?.(this.route()));
+        this.el.liveToggle?.addEventListener("click", () => {
+            const open = this.el.liveFields?.hasAttribute("hidden");
+            if (open) this.el.liveFields?.removeAttribute("hidden");
+            else this.el.liveFields?.setAttribute("hidden", "");
+        });
         this.el.winterCta?.addEventListener("click", () => this.onWinterReplay?.());
-        this.el.backToMap?.addEventListener("click", () => this.onBackToMap?.());
+        this.el.back?.addEventListener("click", () => this.onBackToMap?.());
+        this.el.why?.addEventListener("click", () => {
+            this.openCopilot();
+            this.onCopilotAsk?.("Why is this risk?", {});
+        });
         this.replayEl.start?.addEventListener("click", () => {
             // also used by RouteFlow.onWinterReplay via click()
         });
@@ -221,8 +236,11 @@ export class Shell {
     }
 
     setBusy(busy) {
-        this.el.go.disabled = busy;
-        this.el.go.textContent = busy ? "Analyzing" : "Analyze route";
+        if (this.el.go) {
+            this.el.go.disabled = busy;
+            this.el.go.textContent = busy ? "Analyzing" : "Analyze corridor";
+        }
+        if (this.el.plan) this.el.plan.disabled = busy;
     }
 
     hideForm() {
@@ -508,8 +526,9 @@ export function minutesToClock(mins) {
 }
 
 function routeLabel(route) {
-    if (route?.label) return route.label;
+    if (route?.journeyLabel) return route.journeyLabel;
     if (route?.from && route?.to) return `${route.from} → ${route.to}`;
+    if (route?.label) return route.label;
     return route?.segmentId || "";
 }
 
@@ -631,19 +650,25 @@ const MARKUP = `
             Know the road<em>before it closes.</em>
         </h1>
 
-        <div class="b-fields b-rise b-d3">
-            <div class="b-field b-field-wide">
-                <label for="b-segment">Road segment</label>
-                <select id="b-segment"></select>
-            </div>
-            <div class="b-field">
-                <label for="b-depart">Departure</label>
-                <input id="b-depart" type="time" value="16:00" step="900" />
-            </div>
+        <div class="b-rise b-d3">
+            <button class="b-go" id="b-plan" type="button">Plan journey</button>
         </div>
+        <p class="b-rise b-d4">
+            <button class="b-text-link" id="b-live-toggle" type="button">Live conditions</button>
+        </p>
 
-        <div class="b-rise b-d4">
-            <button class="b-go" id="b-go">Analyze route</button>
+        <div id="b-live-fields" class="b-live-fields b-rise b-d4" hidden>
+            <div class="b-fields">
+                <div class="b-field b-field-wide">
+                    <label for="b-segment">Trained corridor</label>
+                    <select id="b-segment"></select>
+                </div>
+                <div class="b-field">
+                    <label for="b-depart">Departure</label>
+                    <input id="b-depart" type="time" value="16:00" step="900" />
+                </div>
+            </div>
+            <button class="b-go" id="b-go" type="button">Analyze corridor</button>
         </div>
         <p class="b-mode b-rise b-d4" id="b-mode" hidden></p>
     </div>
@@ -679,10 +704,10 @@ const MARKUP = `
         </div>
 
         <div class="b-actions">
-            <button class="b-back" id="b-map">Back to map</button>
-            <button class="b-back" id="b-back">Change route</button>
-            <button class="b-back" id="b-ask">Ask KAIROS</button>
-            <button class="b-back" id="b-replay-start">Illustrative winter scenario</button>
+            <button class="b-back" id="b-why" type="button">Why this risk?</button>
+            <button class="b-back" id="b-ask" type="button">Ask KAIROS</button>
+            <button class="b-back" id="b-back" type="button">Change route</button>
+            <button class="b-back" id="b-replay-start" type="button">Illustrative winter scenario</button>
         </div>
         <button class="b-winter-cta" id="b-winter-cta" type="button" hidden>
             See KAIROS in winter conditions
