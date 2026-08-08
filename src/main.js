@@ -44,6 +44,7 @@ import { weatherFromRisk } from "./app/weatherState.js";
 import { Shell } from "./product/shell.js";
 import { RouteFlow } from "./product/routeFlow.js";
 import { Replay } from "./product/replay.js";
+import { JourneyMap } from "./product/journeyMap.js";
 import { loadSegments } from "./services/predictionService.js";
 import { SprayField } from "./vfx/particles.js";
 import { BlizzardField } from "./vfx/blizzard.js";
@@ -223,6 +224,50 @@ async function boot() {
     // the live prediction drives — not a LightGBM score for Astana–Karaganda.
     const replay = new Replay({ shell, weather, camera: rig });
 
+    /** @type {"map"|"cinematic"} */
+    let appMode = "map";
+    /** @type {JourneyMap|null} */
+    let journeyMap = null;
+
+    const setMode = (mode) => {
+        appMode = mode;
+        if (mode === "map") {
+            canvas.style.visibility = "hidden";
+            shell.root.style.visibility = "hidden";
+            shell.root.style.pointerEvents = "none";
+            journeyMap?.show();
+        } else {
+            journeyMap?.hide();
+            canvas.style.visibility = "visible";
+            shell.root.style.visibility = "visible";
+            shell.root.style.pointerEvents = "";
+        }
+    };
+
+    journeyMap = new JourneyMap({
+        onExplore: (q) => {
+            setMode("cinematic");
+            shell.reveal();
+            shell.setStatus(`${q.journeyLabel} · ${q.label}`);
+            flow.run({
+                segmentId: q.segmentId,
+                label: q.label,
+                departure: q.departure,
+            });
+        },
+        onWinterScenario: () => {
+            setMode("cinematic");
+            shell.reveal();
+            // Show result shell chrome then start illustrative replay.
+            shell.setView("result");
+            shell.replayEl.start?.click();
+        },
+    });
+    shell.onBackToMap = () => {
+        flow.reset();
+        setMode("map");
+    };
+
     // No character to report on; the overlay already renders a dash for it.
     const overlay = new Overlay({ rig });
     // Only in development: the tuning panel is not part of the product.
@@ -269,6 +314,12 @@ async function boot() {
         if (dtMs > 100) dtMs = 100;
         const dt = S.freezeTime ? 0 : dtMs / 1000;
         time += dt;
+
+        // Map mode: skip the heavy WebGPU frame so MapLibre stays responsive.
+        if (appMode === "map") {
+            endFrame();
+            return;
+        }
 
         pollInput();
 
@@ -327,15 +378,16 @@ async function boot() {
         endFrame();
     });
 
-    // The interface goes up only once real frames are on screen, so it never
-    // appears over a half-built scene.
-    shell.reveal();
+    await journeyMap.init();
+    // Start on the national map; cinematic WebGPU waits until Explore.
+    setMode("map");
 
     await loading.done();
     setTimeout(() => overlay.resetSpikes(), 800);
 
     globalThis.BORAN = {
         engine, scene, rig, subject, road, weather, shell, flow, replay,
+        journeyMap,
         spray, blizzard, spellLights,
         overlay, terrain, sky, shadows, post, depthPass,
         S, input, perfStats: stats,
@@ -343,6 +395,7 @@ async function boot() {
         setWeather: (ws) => weather.setTarget(ws),
         /** Convenience for the demo and the console: drive everything off risk. */
         setRisk: (r) => weather.setTarget(weatherFromRisk(r)),
+        setMode,
     };
     // The smoke harness and the overlay's pose dump both reach for this name.
     // Renamed properly when the product shell lands.

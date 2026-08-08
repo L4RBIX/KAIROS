@@ -4,48 +4,37 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime
-from zoneinfo import ZoneInfo
 
-import pandas as pd
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .assessment import build_assessment
-from .config import (
-    CORS_ORIGINS,
-    CURVE_HOUR_END,
-    CURVE_HOUR_START,
-    DEEPSEEK_MODEL,
-    SEGMENT_LABELS,
-)
+from .config import CORS_ORIGINS, DEEPSEEK_MODEL, SEGMENT_LABELS
 from . import copilot as copilot_mod
-from .copy import risk_copy
-from .features import (
-    engineer_features,
-    feature_row_at,
-    nearest_hour_index,
-    weather_frame_from_open_meteo,
-)
+from .coverage import analyze_route_coverage, coverage_radius_km
+from .journey import build_journey_summary, empty_prediction_note
 from .model_runtime import get_runtime, load_runtime
 from . import prediction_store
+from .predict_core import predict_segment
 from .schemas import (
     AssessmentOut,
     CopilotRequest,
     CopilotResponse,
     CopilotStatusResponse,
-    CurvePoint,
     HealthResponse,
+    JourneyAnalyzeRequest,
+    JourneyAnalyzeResponse,
+    JourneyIntelligenceRequest,
+    JourneyIntelligenceResponse,
     PredictRequest,
     PredictResponse,
-    SeasonalState,
     SegmentOut,
 )
-from .seasonal import assess_winter_hazard
-from .weather import fetch_hourly_weather
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger("kairos.api")
+
+JOURNEY_KEY = "__journey__"
 
 
 @asynccontextmanager
@@ -54,7 +43,7 @@ async def lifespan(_: FastAPI):
     yield
 
 
-app = FastAPI(title="KAIROS ML API", version="1.1.0", lifespan=lifespan)
+app = FastAPI(title="KAIROS ML API", version="1.2.0", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
@@ -96,6 +85,14 @@ def list_segments() -> list[SegmentOut]:
                 label=seg.label,
                 km_start=seg.km_lo,
                 km_end=seg.km_hi,
+                latitude=seg.latitude,
+                longitude=seg.longitude,
+                km_length=seg.km_length,
+                geo_method="midpoint_buffer",
+                coverage_note=(
+                    f"Approximate corridor ~{coverage_radius_km(seg):.0f} km "
+                    "around a representative midpoint — not a surveyed polyline."
+                ),
             )
         )
     return out
@@ -104,10 +101,7 @@ def list_segments() -> list[SegmentOut]:
 @app.get("/api/copilot/status", response_model=CopilotStatusResponse)
 def copilot_status() -> CopilotStatusResponse:
     ok = copilot_mod.deepseek_configured()
-    return CopilotStatusResponse(
-        available=ok,
-        model=DEEPSEEK_MODEL if ok else None,
-    )
+    return CopilotStatusResponse(available=ok, model=DEEPSEEK_MODEL if ok else None)
 
 
 def _parse_hhmm(hhmm: str) -> tuple[int, int]:
@@ -115,48 +109,7 @@ def _parse_hhmm(hhmm: str) -> tuple[int, int]:
     return int(h), int(m)
 
 
-def _recommended_departure(
-    curve: list[CurvePoint],
-    departure: str,
-    high_threshold: float,
-    requested_risk: float,
-) -> str:
-    if requested_risk < high_threshold:
-        return ""
-    dep_h, dep_m = _parse_hhmm(departure)
-    dep_minutes = dep_h * 60 + dep_m
-
-    prior = [p for p in curve if _parse_hhmm(p.time)[0] * 60 + _parse_hhmm(p.time)[1] <= dep_minutes]
-    if not prior:
-        return ""
-
-    if prior[0].risk >= high_threshold:
-        return ""
-
-    last_safe_i = None
-    for i, p in enumerate(prior):
-        if p.risk < high_threshold:
-            last_safe_i = i
-        else:
-            break
-    if last_safe_i is None:
-        return ""
-
-    safe = prior[last_safe_i]
-    if last_safe_i + 1 < len(prior):
-        nxt = prior[last_safe_i + 1]
-        if nxt.risk >= high_threshold and nxt.risk != safe.risk:
-            t0 = _parse_hhmm(safe.time)[0] * 60 + _parse_hhmm(safe.time)[1]
-            t1 = _parse_hhmm(nxt.time)[0] * 60 + _parse_hhmm(nxt.time)[1]
-            frac = (high_threshold - safe.risk) / (nxt.risk - safe.risk)
-            mins = int(round(t0 + frac * (t1 - t0)))
-            mins = max(t0, mins - 1)
-            return f"{mins // 60:02d}:{mins % 60:02d}"
-    return safe.time
-
-
 def _curve_point_at(curve: list[dict], hhmm: str) -> dict | None:
-    """Nearest curve point to hhmm (exact hour match preferred)."""
     if not curve:
         return None
     want = _parse_hhmm(hhmm)[0] * 60 + _parse_hhmm(hhmm)[1]
@@ -177,131 +130,11 @@ async def predict(req: PredictRequest) -> PredictResponse:
     seg = rt.segments.get(req.segment_id)
     if seg is None:
         raise HTTPException(status_code=422, detail=f"unsupported segment_id: {req.segment_id}")
-
     try:
-        payload = await fetch_hourly_weather(seg)
-        raw = weather_frame_from_open_meteo(payload)
-        tz = ZoneInfo(seg.timezone)
-        if raw["time"].dt.tz is None:
-            raw["time"] = raw["time"].dt.tz_localize(tz)
-        else:
-            raw["time"] = raw["time"].dt.tz_convert(tz)
-
-        engineered = engineer_features(raw, seg, rt.features)
-
-        now_local = datetime.now(tz)
-        day = now_local.date()
-        curve: list[CurvePoint] = []
-        for hour in range(CURVE_HOUR_START, CURVE_HOUR_END + 1):
-            ts = datetime(day.year, day.month, day.day, hour, 0, tzinfo=tz)
-            idx = nearest_hour_index(engineered, pd.Timestamp(ts))
-            feats = feature_row_at(engineered, idx, rt.features)
-            score = rt.predict_score(feats)
-            row = engineered.iloc[idx]
-            curve.append(
-                CurvePoint(
-                    time=f"{hour:02d}:00",
-                    risk=score,
-                    wind_speed=float(row["wind_speed_10m"]) if pd.notna(row["wind_speed_10m"]) else 0.0,
-                    snowfall=float(row["snowfall"]) if pd.notna(row["snowfall"]) else 0.0,
-                    visibility=float(row["visibility"]) if pd.notna(row["visibility"]) else 0.0,
-                    temperature=float(row["temperature_2m"]) if pd.notna(row["temperature_2m"]) else 0.0,
-                )
-            )
-
-        dh, dm = _parse_hhmm(req.departure)
-        dep_ts = datetime(day.year, day.month, day.day, dh, dm, tzinfo=tz)
-        dep_idx = nearest_hour_index(engineered, pd.Timestamp(dep_ts))
-        dep_feats = feature_row_at(engineered, dep_idx, rt.features)
-        risk = rt.predict_score(dep_feats)
-        dep_row = engineered.iloc[dep_idx]
-        wind = float(dep_row["wind_speed_10m"]) if pd.notna(dep_row["wind_speed_10m"]) else 0.0
-        gust = float(dep_row["wind_gusts_10m"]) if pd.notna(dep_row["wind_gusts_10m"]) else wind
-        snow = float(dep_row["snowfall"]) if pd.notna(dep_row["snowfall"]) else 0.0
-        vis = float(dep_row["visibility"]) if pd.notna(dep_row["visibility"]) else 0.0
-        temp = float(dep_row["temperature_2m"]) if pd.notna(dep_row["temperature_2m"]) else 0.0
-        snow_depth = float(dep_row["snow_depth"]) if pd.notna(dep_row["snow_depth"]) else 0.0
-        precip = float(dep_row["precipitation"]) if pd.notna(dep_row["precipitation"]) else 0.0
-        snow_24 = float(dep_row["snowfall_sum_24h"]) if pd.notna(dep_row["snowfall_sum_24h"]) else 0.0
-
-        seasonal_raw = assess_winter_hazard(
-            temperature=temp,
-            snowfall=snow,
-            snow_depth=snow_depth,
-            visibility=vis,
-            precipitation=precip,
-            snowfall_sum_24h=snow_24,
-        )
-        seasonal = SeasonalState(**seasonal_raw)
-
-        label = rt.risk_label(risk)
-        recommended = _recommended_departure(curve, req.departure, rt.high_threshold, risk)
-        headline, detail = risk_copy(
-            label,
-            wind_speed=wind,
-            wind_gusts=gust,
-            snowfall=snow,
-            visibility=vis,
-            recommended_departure=recommended,
-        )
-
-        # Honest copy when winter hazard is inactive — do not falsify risk.
-        if not seasonal.winter_hazard_active:
-            headline = "Winter hazard inactive under current conditions."
-            detail = (
-                f"{seasonal.reason} Live weather: wind {wind:.0f} m/s, "
-                f"snowfall {snow:.1f} mm/h, visibility ~{vis / 1000:.0f} km, "
-                f"{temp:.0f}°C. KAIROS model score remains {round(risk * 100)}% "
-                f"(risk score, not a calibrated probability)."
-            )
-            if seasonal.ood_caution and risk >= rt.medium_threshold:
-                detail += (
-                    " Elevated model scores during non-winter weather may reflect "
-                    "out-of-distribution behaviour."
-                )
-
-        assessment_raw = build_assessment(
-            risk=risk,
-            risk_label=label,
-            departure=req.departure,
-            recommended_departure=recommended,
-            wind_speed=wind,
-            wind_gusts=gust,
-            snowfall=snow,
-            visibility=vis,
-            temperature=temp,
-            winter_hazard_active=seasonal.winter_hazard_active,
-            seasonal_reason=seasonal.reason,
-            locale="en",
-        )
-        assessment = AssessmentOut(**assessment_raw)
-
-        response = PredictResponse(
-            segment_id=req.segment_id,
-            risk=risk,
-            risk_label=label,  # type: ignore[arg-type]
-            wind_speed=wind,
-            wind_gusts=gust,
-            snowfall=snow,
-            visibility=vis,
-            temperature=temp,
-            recommended_departure=recommended,
-            headline=headline,
-            detail=detail,
-            target_horizon_hours=int(rt.meta.get("horizon_hours", 6)),
-            medium_risk_threshold=rt.medium_threshold,
-            high_risk_threshold=rt.high_threshold,
-            seasonal=seasonal,
-            assessment=assessment,
-            curve=curve,
-        )
-
+        response = await predict_segment(req.segment_id, req.departure)
         prediction_store.put_prediction(
             req.segment_id,
-            {
-                **response.model_dump(),
-                "segment_label": seg.label,
-            },
+            {**response.model_dump(), "segment_label": seg.label},
         )
         return response
     except HTTPException:
@@ -309,6 +142,174 @@ async def predict(req: PredictRequest) -> PredictResponse:
     except Exception as exc:
         log.exception("predict failed segment=%s", req.segment_id)
         raise HTTPException(status_code=502, detail="prediction failed") from exc
+
+
+@app.post("/api/journey/analyze", response_model=JourneyAnalyzeResponse)
+async def journey_analyze(req: JourneyAnalyzeRequest) -> JourneyAnalyzeResponse:
+    """
+    Match route geometry to trained midpoints, then run LightGBM ONLY on matches.
+    Arbitrary roads never receive fabricated ML risk.
+    """
+    rt = get_runtime()
+    coverage = analyze_route_coverage(
+        req.geometry,
+        rt.segments,
+        total_km=req.distance_km,
+    )
+
+    # Cap ML calls — nearest matches only (hackathon latency).
+    matches = coverage.get("matches") or []
+    predict_ids = [m["segment_id"] for m in matches[:3]]
+
+    predictions: list[dict] = []
+    for sid in predict_ids:
+        try:
+            pred = await predict_segment(sid, req.departure)
+            payload = {
+                **pred.model_dump(),
+                "segment_label": rt.segments[sid].label,
+            }
+            prediction_store.put_prediction(sid, payload)
+            predictions.append(payload)
+        except Exception:
+            log.exception("journey predict failed segment=%s", sid)
+
+    summary = build_journey_summary(
+        from_label=req.from_label,
+        to_label=req.to_label,
+        departure=req.departure,
+        coverage=coverage,
+        predictions=predictions,
+        rt=rt,
+    )
+    note = "" if summary["ml_available"] else empty_prediction_note()
+    summary["note"] = note
+    prediction_store.put_prediction(JOURNEY_KEY, summary)
+
+    assessment = summary.get("assessment")
+    return JourneyAnalyzeResponse(
+        journey=summary["journey"],
+        coverage=summary["coverage"],
+        predictions=summary["predictions"],
+        highest_risk_segment=summary.get("highest_risk_segment"),
+        assessment=AssessmentOut(**assessment) if assessment else None,
+        safest_window=summary["safest_window"],
+        wait_compare=summary.get("wait_compare"),
+        ml_available=summary["ml_available"],
+        note=note,
+    )
+
+
+@app.post("/api/journey/intelligence", response_model=JourneyIntelligenceResponse)
+async def journey_intelligence(req: JourneyIntelligenceRequest) -> JourneyIntelligenceResponse:
+    stored = prediction_store.get_prediction(JOURNEY_KEY)
+    if not stored:
+        raise HTTPException(
+            status_code=409,
+            detail="no journey analysis cached; run /api/journey/analyze first",
+        )
+
+    highest = stored.get("highest_risk_segment")
+    coverage = stored.get("coverage") or {}
+    journey = stored.get("journey") or {}
+    wait = stored.get("wait_compare")
+    safest = stored.get("safest_window") or {}
+
+    prompts = {
+        "summarize": (
+            "Write a concise KAIROS Route Intelligence briefing for this journey. "
+            "Lead with coverage %, highest-risk trained section (if any), recommended departure, "
+            "and what is uncovered (weather-only). Do not invent scores."
+        ),
+        "why": (
+            "Explain WHY the highest-risk trained section has its current score, "
+            "using only supplied weather and risk curve facts. No SHAP; no invented causality."
+        ),
+        "wait": (
+            "Explain what changes if the driver waits about 2 hours, using wait_compare numbers only."
+        ),
+        "safest": (
+            "Explain the deterministic safest_window using only supplied numbers. "
+            "Do not recalculate a different window."
+        ),
+        "ask": req.message or "Answer the driver's journey question using only supplied context.",
+    }
+    message = prompts.get(req.action, prompts["summarize"])
+    if req.action == "ask" and req.message.strip():
+        message = req.message.strip()
+
+    context = {
+        "product": "KAIROS Route Intelligence",
+        "journey": journey,
+        "coverage": coverage,
+        "highest_risk_segment": highest,
+        "safest_window": safest,
+        "wait_compare": wait,
+        "ml_available": stored.get("ml_available", False),
+        "rules": [
+            "Only trained corridors have LightGBM risk.",
+            "Uncovered sections are weather-only / not yet trained.",
+            "Risk scores are not calibrated probabilities.",
+            "Do not invent closures, accidents, or scores.",
+        ],
+        "score_note": "Model output is a risk score, not a calibrated probability.",
+    }
+
+    highest_risk = float(highest["risk"]) if highest else None
+    cov_pct = coverage.get("percent")
+
+    if not copilot_mod.deepseek_configured():
+        # Deterministic fallback briefing — still useful without DeepSeek.
+        if not stored.get("ml_available"):
+            answer = (
+                f"Journey {journey.get('from')} → {journey.get('to')} "
+                f"({journey.get('distance_km')} km). "
+                f"KAIROS ML coverage {cov_pct}% under conservative matching. "
+                "No trained corridor matched — weather monitoring only; no LightGBM risk invented."
+            )
+        else:
+            answer = (
+                f"Journey {journey.get('from')} → {journey.get('to')}. "
+                f"Model coverage ~{cov_pct}%. "
+                f"Main trained concern: {highest.get('segment_label') or highest.get('segment_id')} "
+                f"at {round((highest_risk or 0) * 100)}% ({highest.get('risk_label')}). "
+                f"Recommended departure: {highest.get('recommended_departure') or 'current window acceptable'}. "
+                "Uncovered sections remain weather-only."
+            )
+        return JourneyIntelligenceResponse(
+            answer=answer,
+            available=False,
+            action=req.action,
+            locale=req.locale,
+            ml_available=bool(stored.get("ml_available")),
+            highest_risk=highest_risk,
+            coverage_percent=cov_pct,
+        )
+
+    user_payload = copilot_mod.build_user_payload(
+        message=message,
+        locale=req.locale,
+        profile=req.profile,
+        context=context,
+        compare_points=[],
+    )
+    try:
+        answer = await copilot_mod.complete_copilot(user_payload)
+    except TimeoutError:
+        raise HTTPException(status_code=504, detail="AI explanation temporarily unavailable.") from None
+    except Exception:
+        log.exception("journey intelligence failed")
+        raise HTTPException(status_code=502, detail="AI explanation temporarily unavailable.") from None
+
+    return JourneyIntelligenceResponse(
+        answer=answer,
+        available=True,
+        action=req.action,
+        locale=req.locale,
+        ml_available=bool(stored.get("ml_available")),
+        highest_risk=highest_risk,
+        coverage_percent=cov_pct,
+    )
 
 
 @app.post("/api/copilot", response_model=CopilotResponse)
@@ -324,7 +325,6 @@ async def copilot(req: CopilotRequest) -> CopilotResponse:
             detail="no cached prediction for segment; run /api/predict first",
         )
 
-    # Authoritative context from server store — never trust client risk/weather.
     seasonal = stored.get("seasonal") or {}
     assessment = build_assessment(
         risk=float(stored["risk"]),

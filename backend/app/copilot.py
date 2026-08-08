@@ -42,6 +42,7 @@ Role boundaries (strict):
 - Respond in the language requested by locale (en, ru, or kk).
 - Profile (car/truck/family) changes practical advice only, never the risk score.
 - When compare_points are supplied, use those exact numbers — do not invent curve values.
+- You may emphasize key terms with **double asterisks** (e.g. **inactive**, **high**). Do not use other markdown.
 """
 
 _CACHE: dict[str, tuple[float, str]] = {}

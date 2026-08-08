@@ -6,6 +6,15 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# Load backend/.env if present (never commit secrets). Safe no-op when missing.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(ROOT / ".env", override=False)
+except ImportError:
+    pass
+
 MODEL_DIR = Path(os.environ.get("KAIROS_MODEL_DIR", ROOT / "model" / "BORAN_MODEL"))
 
 OPEN_METEO_URL = os.environ.get(

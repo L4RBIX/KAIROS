@@ -148,6 +148,7 @@ export class RouteFlow {
             }
         }
 
+        this.shell.appendCopilotMessage("user", message);
         this.shell.setCopilotBusy(true);
         try {
             const res = await askCopilot({
@@ -159,12 +160,15 @@ export class RouteFlow {
                 compareTimes,
                 segmentLabel: this.route.label,
             });
-            this.shell.showCopilotAnswer(res.answer, res.available !== false);
+            this.shell.appendCopilotMessage("assistant", res.answer, {
+                available: res.available !== false,
+            });
         } catch (err) {
             console.warn("[kairos] copilot unavailable", err);
-            this.shell.showCopilotAnswer(
+            this.shell.appendCopilotMessage(
+                "assistant",
                 "AI explanation temporarily unavailable.",
-                false
+                { available: false },
             );
         } finally {
             this.shell.setCopilotBusy(false);

@@ -75,6 +75,69 @@ class SegmentOut(BaseModel):
     label: str
     km_start: float
     km_end: float
+    latitude: float = 0.0
+    longitude: float = 0.0
+    km_length: float = 0.0
+    geo_method: str = "midpoint"
+    coverage_note: str = "Representative midpoint — not a surveyed polyline."
+
+
+class JourneyAnalyzeRequest(BaseModel):
+    from_label: str = Field(..., min_length=1, max_length=80)
+    to_label: str = Field(..., min_length=1, max_length=80)
+    departure: str
+    geometry: list[list[float]] = Field(..., min_length=2, max_length=5000)
+    distance_km: Optional[float] = None
+
+    @field_validator("departure")
+    @classmethod
+    def validate_departure(cls, v: str) -> str:
+        m = HHMM.match((v or "").strip())
+        if not m:
+            raise ValueError("departure must be HH:MM")
+        return f"{int(m.group(1)):02d}:{m.group(2)}"
+
+    @field_validator("geometry")
+    @classmethod
+    def validate_geometry(cls, v: list[list[float]]) -> list[list[float]]:
+        out: list[list[float]] = []
+        for pt in v:
+            if not isinstance(pt, (list, tuple)) or len(pt) < 2:
+                raise ValueError("geometry points must be [lon, lat]")
+            lon, lat = float(pt[0]), float(pt[1])
+            if not (-180 <= lon <= 180 and -90 <= lat <= 90):
+                raise ValueError("invalid lon/lat")
+            out.append([lon, lat])
+        return out
+
+
+class JourneyIntelligenceRequest(BaseModel):
+    action: Literal["summarize", "why", "wait", "safest", "ask"] = "summarize"
+    message: str = Field(default="", max_length=600)
+    locale: Literal["en", "ru", "kk"] = "en"
+    profile: Literal["car", "truck", "family"] = "car"
+
+
+class JourneyAnalyzeResponse(BaseModel):
+    journey: dict[str, Any]
+    coverage: dict[str, Any]
+    predictions: list[dict[str, Any]]
+    highest_risk_segment: Optional[dict[str, Any]] = None
+    assessment: Optional[AssessmentOut] = None
+    safest_window: dict[str, Any]
+    wait_compare: Optional[dict[str, Any]] = None
+    ml_available: bool
+    note: str = ""
+
+
+class JourneyIntelligenceResponse(BaseModel):
+    answer: str
+    available: bool = True
+    action: str
+    locale: str
+    ml_available: bool
+    highest_risk: Optional[float] = None
+    coverage_percent: Optional[float] = None
 
 
 class HealthResponse(BaseModel):

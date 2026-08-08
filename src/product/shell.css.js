@@ -99,7 +99,24 @@ export const CSS = `
     display: grid;
     align-items: start;
 }
-#b-form, .b-result { grid-area: 1 / 1; }
+#b-form, .b-result, #b-copilot, #b-replay { grid-area: 1 / 1; }
+
+/* Only the active panel paints. Opacity alone still left form/result
+   stacked under Copilot in WebKit when native <select> opened. */
+.b-panel > #b-form,
+.b-panel > .b-result,
+.b-panel > #b-copilot,
+.b-panel > #b-replay {
+    visibility: hidden;
+    pointer-events: none;
+}
+.b-panel[data-view="form"] > #b-form,
+.b-panel[data-view="result"] > .b-result,
+.b-panel[data-view="copilot"] > #b-copilot,
+.b-panel[data-view="replay"] > #b-replay {
+    visibility: visible;
+    pointer-events: auto;
+}
 
 .b-lede {
     font-size: clamp(30px, 4.6vw, 62px);
@@ -219,24 +236,23 @@ export const CSS = `
    beside the other, so they cross-fade in place — which is what makes the
    analyse sequence read as one view changing rather than two screens. */
 #b-form {
+    opacity: 1;
+    transform: none;
     transition: opacity 620ms var(--b-ease), transform 620ms var(--b-ease);
 }
-#b-form.b-gone {
+.b-panel:not([data-view="form"]) > #b-form {
     opacity: 0;
     transform: translate3d(0, -14px, 0);
-    pointer-events: none;
 }
 
 .b-result {
     opacity: 0;
     transform: translate3d(0, 18px, 0);
-    pointer-events: none;
     transition: opacity 900ms var(--b-ease), transform 900ms var(--b-ease);
 }
-.b-result.b-shown {
+.b-panel[data-view="result"] > .b-result {
     opacity: 1;
     transform: none;
-    pointer-events: auto;
 }
 
 .b-route {
@@ -442,15 +458,15 @@ export const CSS = `
 
 /* ------------------------------------------------------------------ replay */
 
-#b-replay { grid-area: 1 / 1; }
-
 .b-replay {
     opacity: 0;
     transform: translate3d(0, 18px, 0);
-    pointer-events: none;
     transition: opacity 800ms var(--b-ease), transform 800ms var(--b-ease);
 }
-.b-replay.b-shown { opacity: 1; transform: none; pointer-events: auto; }
+.b-panel[data-view="replay"] > #b-replay {
+    opacity: 1;
+    transform: none;
+}
 
 .b-rp-head {
     display: flex;
@@ -680,23 +696,19 @@ export const CSS = `
 .b-actions { display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; }
 
 /* ----------------------------------------------------------------- copilot */
+/* Shares the panel cell with form/result/replay — never overlays them. */
 
 .b-copilot {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: min(420px, 92vw);
-    max-height: min(72vh, 640px);
-    overflow: auto;
     opacity: 0;
-    pointer-events: none;
     transform: translate3d(0, 18px, 0);
     transition: opacity 700ms var(--b-ease), transform 700ms var(--b-ease);
-    padding-right: 8px;
+    max-width: min(560px, 92vw);
+    max-height: min(78vh, 720px);
+    overflow-y: auto;
+    padding-right: 4px;
 }
-.b-copilot.b-shown {
+.b-panel[data-view="copilot"] > #b-copilot {
     opacity: 1;
-    pointer-events: auto;
     transform: none;
 }
 
@@ -721,18 +733,26 @@ export const CSS = `
     max-width: 16em;
 }
 .b-cp-x {
+    flex-shrink: 0;
     background: transparent;
-    border: 0;
-    border-bottom: 1px solid var(--b-line);
-    color: var(--b-dim);
+    border: 1px solid var(--b-line);
+    border-radius: 0;
+    color: var(--b-frost);
     font: inherit;
     font-size: 10px;
-    letter-spacing: 0.2em;
+    font-weight: 500;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     cursor: pointer;
-    padding: 0 0 4px;
+    padding: 10px 12px;
+    transition: border-color 240ms var(--b-ease), color 240ms var(--b-ease);
 }
-.b-cp-x:hover { color: var(--b-frost); }
+.b-cp-x:hover { border-color: var(--b-frost); color: var(--b-accent); }
+
+.b-cp-back {
+    margin-top: 18px;
+    display: inline-block;
+}
 
 .b-cp-summary,
 .b-cp-best,
@@ -818,17 +838,54 @@ export const CSS = `
     50% { opacity: 1; }
 }
 
-.b-cp-answer {
+.b-cp-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: min(38vh, 320px);
+    overflow-y: auto;
+    margin: 4px 0 12px;
+    padding-right: 6px;
+    max-width: 36em;
+    scrollbar-width: thin;
+    scrollbar-color: var(--b-line) transparent;
+}
+
+.b-cp-msg-who {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+    margin-bottom: 6px;
+}
+
+.b-cp-msg-body {
     font-size: 14px;
     font-weight: 300;
     line-height: 1.6;
     color: var(--b-frost);
-    min-height: 1.5em;
-    margin: 0 0 14px;
-    max-width: 36em;
     white-space: pre-wrap;
 }
-.b-cp-answer[data-available="0"] { color: var(--b-warn); }
+
+.b-cp-msg-user .b-cp-msg-body {
+    color: var(--b-dim);
+    border-left: 1px solid var(--b-line);
+    padding-left: 12px;
+}
+
+.b-cp-msg-assistant .b-cp-msg-body {
+    color: var(--b-frost);
+}
+
+.b-cp-msg-assistant[data-available="0"] .b-cp-msg-body {
+    color: var(--b-warn);
+}
+
+.b-cp-msg-body strong {
+    font-weight: 500;
+    color: var(--b-frost);
+}
 
 .b-cp-input-row {
     display: flex;
@@ -850,6 +907,4 @@ export const CSS = `
 }
 .b-cp-input-row input:focus-visible { border-bottom-color: var(--b-accent); }
 .b-cp-send { padding: 12px 18px; }
-
-.b-panel { position: relative; }
 `;

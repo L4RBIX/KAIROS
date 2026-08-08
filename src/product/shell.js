@@ -43,6 +43,7 @@ export class Shell {
             metVis: root.querySelector("#b-met-vis"),
             metTemp: root.querySelector("#b-met-temp"),
             winterCta: root.querySelector("#b-winter-cta"),
+            backToMap: root.querySelector("#b-map"),
             scoreNote: root.querySelector("#b-score-note"),
             copilot: root.querySelector("#b-copilot"),
             copilotToggle: root.querySelector("#b-ask"),
@@ -58,6 +59,8 @@ export class Shell {
             copilotStatus: root.querySelector("#b-cp-status"),
             copilotLocale: root.querySelector("#b-cp-locale"),
             copilotProfile: root.querySelector("#b-cp-profile"),
+            copilotThread: root.querySelector("#b-cp-thread"),
+            copilotBack: root.querySelector("#b-cp-back"),
         };
 
         this.replayEl = {
@@ -75,21 +78,34 @@ export class Shell {
 
         this.setSegments(DEFAULT_SEGMENTS);
 
+        this.panel = root.querySelector(".b-panel");
+        /** @type {"form"|"result"|"copilot"|"replay"|"hold"} */
+        this._view = "form";
+        /** @type {import("../services/predictionService.js").Prediction|null} */
+        this._lastPrediction = null;
+        /** @type {Array<{role:string,text:string,available?:boolean}>} */
+        this._chat = [];
+        this.setView("form");
+
         /** @type {((r: {segmentId:string, label:string, departure:string}) => void)|null} */
         this.onAnalyze = null;
         /** @type {((message: string, extras?: object) => void)|null} */
         this.onCopilotAsk = null;
         /** @type {(() => void)|null} */
         this.onWinterReplay = null;
+        /** @type {(() => void)|null} */
+        this.onBackToMap = null;
 
         this.el.go.addEventListener("click", () => this.onAnalyze?.(this.route()));
         this.el.winterCta?.addEventListener("click", () => this.onWinterReplay?.());
+        this.el.backToMap?.addEventListener("click", () => this.onBackToMap?.());
         this.replayEl.start?.addEventListener("click", () => {
             // also used by RouteFlow.onWinterReplay via click()
         });
 
         this.el.copilotToggle?.addEventListener("click", () => this.openCopilot());
         this.el.copilotClose?.addEventListener("click", () => this.closeCopilot());
+        this.el.copilotBack?.addEventListener("click", () => this.closeCopilot());
         this.el.copilotSend?.addEventListener("click", () => this._submitCopilot());
         this.el.copilotInput?.addEventListener("keydown", (e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -103,6 +119,29 @@ export class Shell {
             const prompt = btn.getAttribute("data-prompt") || "";
             this.onCopilotAsk?.(prompt, this._promptExtras(prompt));
         });
+        // Changing language/profile must never reveal the landing form underneath.
+        this.el.copilotLocale?.addEventListener("change", () => {
+            if (this._view === "copilot" && this._lastPrediction) {
+                this.setView("copilot");
+                this._fillCopilotCard(this._lastPrediction);
+            }
+        });
+        this.el.copilotProfile?.addEventListener("change", () => {
+            if (this._view === "copilot") this.setView("copilot");
+        });
+    }
+
+    /**
+     * Exclusive panel mode — only one of form/result/copilot/replay is visible.
+     * @param {"form"|"result"|"copilot"|"replay"|"hold"} view
+     */
+    setView(view) {
+        this._view = view;
+        if (this.panel) this.panel.dataset.view = view;
+        this.el.form.classList.toggle("b-gone", view !== "form");
+        this.el.result.classList.toggle("b-shown", view === "result");
+        this.el.copilot.classList.toggle("b-shown", view === "copilot");
+        this.replayEl.panel.classList.toggle("b-shown", view === "replay");
     }
 
     _promptExtras(prompt) {
@@ -187,12 +226,13 @@ export class Shell {
     }
 
     hideForm() {
-        this.el.form.classList.add("b-gone");
+        this.setView("hold");
     }
 
     showForm() {
-        this.el.form.classList.remove("b-gone");
-        this.el.result.classList.remove("b-shown");
+        this._lastPrediction = null;
+        this.clearCopilotChat();
+        this.setView("form");
         this.setBusy(false);
     }
 
@@ -201,11 +241,12 @@ export class Shell {
      * @param {{segmentId?:string, label?:string, from?:string, to?:string}} route
      */
     showResult(p, route) {
-        const e = this.el;
-        e.route.textContent = routeLabel(route);
+        this._lastPrediction = p;
+        this.clearCopilotChat();
+        this.el.route.textContent = routeLabel(route);
         this._paintPrediction(p);
-        e.result.classList.add("b-shown");
         this._fillCopilotCard(p);
+        this.setView("result");
     }
 
     /**
@@ -215,10 +256,6 @@ export class Shell {
     updateScrub(p, clock) {
         this.el.timeRead.textContent = clock;
         this._paintPrediction(p);
-        // Keep assessment card in sync with scrubbed risk without LLM.
-        if (this.el.copilot.classList.contains("b-shown")) {
-            this._fillCopilotCard(p);
-        }
     }
 
     /**
@@ -233,7 +270,10 @@ export class Shell {
             ? "model score · winter hazard inactive"
             : `${p.riskLabel} closure risk`;
         e.headline.textContent = p.headline;
-        e.detail.textContent = p.detail;
+        // Keep the result view short; long explanations live in Copilot.
+        e.detail.textContent = calm
+            ? (p.seasonalReason || "No snow or freezing conditions in the current forecast.")
+            : p.detail;
         e.result.dataset.band = calm ? "calm" : p.riskLabel;
         e.result.dataset.season = calm ? "live-calm" : "winter";
 
@@ -251,6 +291,10 @@ export class Shell {
 
         if (e.winterCta) {
             e.winterCta.hidden = !calm;
+        }
+        // One winter entry point when live is calm — avoid duplicate CTAs.
+        if (this.replayEl.start) {
+            this.replayEl.start.hidden = !!calm;
         }
 
         if (e.scoreNote) {
@@ -283,6 +327,7 @@ export class Shell {
 
     /** @param {import("../services/predictionService.js").Prediction} p */
     _fillCopilotCard(p) {
+        const locale = this.getCopilotLocale();
         const a = p.assessment;
         this.el.copilotTitle.textContent = a?.title || "KAIROS Copilot";
         this.el.copilotSummary.textContent = a?.summary || p.headline || "";
@@ -296,10 +341,12 @@ export class Shell {
         this.el.copilotConcerns.textContent = concerns.length
             ? concerns.join(" · ")
             : "";
-        const prompts = a?.quickPrompts || [
-            "Summarize current conditions",
-            "Should I leave now?",
-        ];
+        // Explicit false = live calm/summer. Undefined (mock) keeps winter prompts.
+        const prompts = quickPromptsFor(
+            p.riskLabel || "low",
+            p.winterHazardActive !== false,
+            locale,
+        );
         this.el.copilotPrompts.replaceChildren();
         for (const q of prompts) {
             const b = document.createElement("button");
@@ -312,32 +359,92 @@ export class Shell {
     }
 
     openCopilot() {
-        this.el.copilot.classList.add("b-shown");
-        this.el.copilotAnswer.textContent = "";
+        if (this._lastPrediction) this._fillCopilotCard(this._lastPrediction);
         this.el.copilotStatus.textContent = "";
+        this.setView("copilot");
+        this._scrollCopilotThread();
         this.el.copilotInput?.focus();
     }
 
     closeCopilot() {
-        this.el.copilot.classList.remove("b-shown");
         this.setCopilotBusy(false);
+        if (this._lastPrediction) this.setView("result");
+        else this.setView("form");
+    }
+
+    clearCopilotChat() {
+        this._chat = [];
+        if (this.el.copilotThread) this.el.copilotThread.replaceChildren();
+        if (this.el.copilotStatus) this.el.copilotStatus.textContent = "";
+    }
+
+    /**
+     * @param {"user"|"assistant"} role
+     * @param {string} text
+     * @param {{ available?: boolean }} [opts]
+     */
+    appendCopilotMessage(role, text, opts = {}) {
+        if (!this.el.copilotThread) return;
+        this.setView("copilot");
+        const available = opts.available !== false;
+        this._chat.push({ role, text, available });
+
+        const row = document.createElement("div");
+        row.className = `b-cp-msg b-cp-msg-${role}`;
+        if (role === "assistant" && !available) {
+            row.dataset.available = "0";
+        }
+
+        const who = document.createElement("div");
+        who.className = "b-cp-msg-who";
+        who.textContent = role === "user" ? "You" : "KAIROS";
+
+        const body = document.createElement("div");
+        body.className = "b-cp-msg-body";
+        if (role === "assistant") {
+            body.innerHTML = formatCopilotHtml(text || "");
+        } else {
+            body.textContent = text || "";
+        }
+
+        row.appendChild(who);
+        row.appendChild(body);
+        this.el.copilotThread.appendChild(row);
+        this._scrollCopilotThread();
+
+        if (role === "assistant") {
+            this.el.copilotStatus.textContent = available
+                ? ""
+                : "AI explanation temporarily unavailable";
+        }
+    }
+
+    showCopilotAnswer(text, available = true) {
+        this.appendCopilotMessage("assistant", text, { available });
+    }
+
+    _scrollCopilotThread() {
+        const t = this.el.copilotThread;
+        if (!t) return;
+        requestAnimationFrame(() => {
+            t.scrollTop = t.scrollHeight;
+        });
     }
 
     setCopilotBusy(busy) {
         if (this.el.copilotSend) this.el.copilotSend.disabled = busy;
         if (this.el.copilotInput) this.el.copilotInput.disabled = busy;
+        if (this.el.copilotPrompts) {
+            this.el.copilotPrompts.style.pointerEvents = busy ? "none" : "";
+            this.el.copilotPrompts.style.opacity = busy ? "0.45" : "";
+        }
         if (this.el.copilotStatus) {
             this.el.copilotStatus.textContent = busy
                 ? "Analyzing road conditions"
                 : "";
             this.el.copilotStatus.dataset.busy = busy ? "1" : "0";
         }
-    }
-
-    showCopilotAnswer(text, available = true) {
-        this.el.copilotAnswer.textContent = text;
-        this.el.copilotAnswer.dataset.available = available ? "1" : "0";
-        this.el.copilotStatus.textContent = available ? "" : "AI explanation temporarily unavailable";
+        if (this._view === "copilot") this.setView("copilot");
     }
 
     getCopilotLocale() {
@@ -350,9 +457,8 @@ export class Shell {
 }
 
 Shell.prototype.enterReplay = function (rec, markFraction) {
-    this.el.result.classList.remove("b-shown");
-    this.closeCopilot();
-    this.replayEl.panel.classList.add("b-shown");
+    this.setCopilotBusy(false);
+    this.setView("replay");
     this.replayEl.date.textContent =
         `Illustrative winter scenario · ${rec.route.from} → ${rec.route.to} · ${rec.label}`;
     this.replayEl.verdict.classList.remove("b-shown");
@@ -363,8 +469,7 @@ Shell.prototype.enterReplay = function (rec, markFraction) {
 };
 
 Shell.prototype.exitReplay = function () {
-    this.replayEl.panel.classList.remove("b-shown");
-    this.el.form.classList.remove("b-gone");
+    this.setView("form");
     this.setBusy(false);
     this.setStatus("Kazakhstan · winter road network");
 };
@@ -411,6 +516,107 @@ function routeLabel(route) {
 function formatVis(m) {
     if (m >= 1000) return `${(m / 1000).toFixed(m >= 10000 ? 0 : 1)} km`;
     return `${Math.round(m)} m`;
+}
+
+/** Escape HTML, then turn `**bold**` into <strong>. */
+function formatCopilotHtml(text) {
+    const esc = String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    return esc
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n/g, "<br>");
+}
+
+function quickPromptsFor(riskLabel, winterActive, locale) {
+    if (!winterActive) {
+        const table = {
+            en: [
+                "Summarize current conditions",
+                "Why is there no winter hazard?",
+                "What does the model score mean in summer?",
+                "When should I use winter replay?",
+            ],
+            ru: [
+                "Кратко опиши текущие условия",
+                "Почему зимняя угроза неактивна?",
+                "Что значит оценка модели летом?",
+                "Когда смотреть зимной сценарий?",
+            ],
+            kk: [
+                "Қазіргі жағдайды қысқаша айт",
+                "Неге қысқы қауіп белсенді емес?",
+                "Жазда модель бағасы нені білдіреді?",
+                "Қысқы сценарийді қашан көру керек?",
+            ],
+        };
+        return table[locale] || table.en;
+    }
+    if (riskLabel === "high") {
+        const table = {
+            en: [
+                "Should I postpone?",
+                "Why is risk high?",
+                "Safest departure today",
+                "What should I prepare?",
+            ],
+            ru: [
+                "Стоит ли отложить поездку?",
+                "Почему риск высокий?",
+                "Самое безопасное время выезда",
+                "Что взять с собой?",
+            ],
+            kk: [
+                "Сапарды кейінге қалдыру керек пе?",
+                "Неге қауіп жоғары?",
+                "Ең қауіпсіз шығу уақыты",
+                "Не дайындау керек?",
+            ],
+        };
+        return table[locale] || table.en;
+    }
+    if (riskLabel === "moderate") {
+        const table = {
+            en: [
+                "What is changing?",
+                "Compare safer times",
+                "Should I leave earlier?",
+                "Summarize weather",
+            ],
+            ru: [
+                "Что меняется?",
+                "Сравни более безопасные времена",
+                "Выехать раньше?",
+                "Кратко о погоде",
+            ],
+            kk: [
+                "Не өзгеруде?",
+                "Қауіпсіз уақыттарды салыстыр",
+                "Ертерек шығу керек пе?",
+                "Ауа райын қысқаша айт",
+            ],
+        };
+        return table[locale] || table.en;
+    }
+    const table = {
+        en: [
+            "Why is this route safer now?",
+            "Best departure today",
+            "Summarize weather",
+        ],
+        ru: [
+            "Почему маршрут сейчас безопаснее?",
+            "Лучшее время выезда сегодня",
+            "Кратко о погоде",
+        ],
+        kk: [
+            "Неге маршрут қазір қауіпсіздеу?",
+            "Бүгінгі ең жақсы шығу уақыты",
+            "Ауа райын қысқаша айт",
+        ],
+    };
+    return table[locale] || table.en;
 }
 
 const MARKUP = `
@@ -473,6 +679,7 @@ const MARKUP = `
         </div>
 
         <div class="b-actions">
+            <button class="b-back" id="b-map">Back to map</button>
             <button class="b-back" id="b-back">Change route</button>
             <button class="b-back" id="b-ask">Ask KAIROS</button>
             <button class="b-back" id="b-replay-start">Illustrative winter scenario</button>
@@ -488,7 +695,7 @@ const MARKUP = `
                 <div class="b-cp-kicker">KAIROS Copilot</div>
                 <div class="b-cp-title" id="b-cp-title"></div>
             </div>
-            <button class="b-cp-x" id="b-cp-close" type="button" aria-label="Close">Close</button>
+            <button class="b-cp-x" id="b-cp-close" type="button">Back to forecast</button>
         </div>
         <p class="b-cp-summary" id="b-cp-summary"></p>
         <p class="b-cp-best" id="b-cp-best" hidden></p>
@@ -512,13 +719,14 @@ const MARKUP = `
                 </select>
             </label>
         </div>
+        <div class="b-cp-thread" id="b-cp-thread" role="log" aria-relevant="additions"></div>
         <p class="b-cp-status" id="b-cp-status" data-busy="0"></p>
-        <p class="b-cp-answer" id="b-cp-answer"></p>
         <div class="b-cp-input-row">
             <input id="b-cp-input" type="text" maxlength="600"
                    placeholder="Ask about this departure…" autocomplete="off" />
             <button class="b-go b-cp-send" id="b-cp-send" type="button">Ask</button>
         </div>
+        <button class="b-back b-cp-back" id="b-cp-back" type="button">Back to forecast</button>
     </div>
 
     <div id="b-replay" class="b-replay" aria-live="polite">
