@@ -1,198 +1,191 @@
 # KAIROS
 
-**Kairos (Καιρός)** — the right moment; the ideal time to act.
+**Καιρός** — the right moment to leave.
 
-**Know the road before it closes.**
+> Know the road before it closes.
 
-An AI-assisted road-safety decision tool for Kazakhstan's winter highway
-network, with a real-time WebGPU environment that *is* the explanation rather
-than a backdrop to it.
-
-A driver enters a route and a departure time. KAIROS answers the question they
-actually have — *should I leave now, later, or not at all?* — and then shows
-them the road they would be driving on, in the conditions predicted for the
-moment they chose. Drag the departure slider and the road disappears under
-drifting snow in front of you.
+Kazakhstan winters shut highways with little warning. Drivers get wind speed and
+a vague “bad weather” banner. **KAIROS answers the real question:** leave now,
+leave later, or don’t go — then puts you on that road in a live WebGPU storm
+driven by the same risk score.
 
 ```
-KAZ-06 · км 1240–1362
-62%   HIGH CLOSURE RISK
-High risk of closure or restriction.
-Recommended departure  before 14:00
+ALMATY → SHYMKENT
+63%   HIGH RISK
+Best departure: before 13:40
 ```
 
-## Running it
+Drag the departure scrubber. Snow thickens. Fog closes in. The road starts to
+disappear. That is the forecast — not a chart next to it.
+
+---
+
+## Why this exists
+
+On the M-36 / republican corridors, a closure is not an inconvenience. It is
+hours of waiting, diverted freight, and people stranded between cities.
+
+Existing apps show meteorology. They do not show **closure risk for a specific
+segment at a specific departure**, and they never make you *feel* what 63%
+means on asphalt.
+
+KAIROS is a decision product with a cinematic proof layer:
+
+| Layer | Job |
+| --- | --- |
+| **LightGBM** | Score trained winter corridors (CLOSE/RESTRICT in 6h) |
+| **Open-Meteo** | Live features for the model |
+| **WebGPU scene** | Same score → fog, blizzard, burial, light |
+| **Copilot** | Explain the score — never overwrite it |
+
+---
+
+## Demo flow (2 minutes)
+
+This is the product hierarchy. Do not skip to the map.
+
+1. **Landing** — cinematic snowy highway. Brand. One line. **Plan journey**.
+2. **Map** — pick From / To (e.g. Almaty → Shymkent). Coverage markers = trained
+   midpoints only.
+3. **Analyze journey** — route + ML coverage. Then return to the 3D road.
+4. **Result** — risk %, band, best departure, live weather mets.
+5. **Scrubber** — move departure; storm intensity follows the risk curve
+   (local lerp — no fetch spam).
+6. **Why this risk? / Ask KAIROS** — DeepSeek grounded on the prediction.
+7. **Change route** — map opens again. WebGPU pauses while you plan.
+
+Optional: **Illustrative winter scenario** — recorded closure replay through the
+same weather director (not claimed as a labelled LightGBM event).
+
+---
+
+## What judges should notice
+
+- **The environment is the explanation.** Risk is not a badge over a static
+  hero image. One weather director drives atmosphere, wind, blizzard, and how
+  buried the carriageway is.
+- **Honest ML coverage.** Only seven trained corridors get LightGBM. Arbitrary
+  roads stay weather-only — labelled as such. No fake national model.
+- **One HTTP predict on Analyse.** Scrubber interpolates the cached curve.
+- **LLM never sets the score.** Copilot explains; LightGBM decides.
+- **Seasonal honesty.** If live winter hazard is inactive, visuals stay calm
+  while the real score remains on screen.
+- **Fallback without lying.** API down → demo mock + explicit banner.
+
+---
+
+## Stack
+
+| | |
+| --- | --- |
+| **Frontend** | Vite, Babylon.js, custom WGSL, MapLibre (planner only) |
+| **Backend** | FastAPI, LightGBM (BORAN model bundle), Open-Meteo |
+| **Copilot** | DeepSeek (server-side key only) |
+| **Rendering** | Clipmap terrain, Nishita sky, PCSS cascades, GPU blizzard |
+
+Built on the [SNOWFLOW](https://github.com/Noniv/snowflow_demo) WebGPU snow
+engine. We removed the game loop and added the highway, weather director,
+journey planner, and product shell.
+
+---
+
+## Quick start
+
+### Frontend
 
 ```bash
 npm install
-cp .env.example .env   # optional: point at the live ML API
-npm run dev            # vite dev server on :5173
-npm run build          # production build into dist/
-npm run preview        # serve the production build
+cp .env.example .env          # set VITE_ML_API_URL=http://localhost:8000
+npm run dev                   # http://localhost:5173
 ```
 
-### Real ML backend
+WebGPU: Chrome 113+ / desktop GPU. Without WebGPU, forecasts still run against
+the fallback shell — the decision does not require snow pixels.
 
-Live Analyse scores one of seven trained road segments with LightGBM (44
-features from Open-Meteo). The departure scrubber stays smooth: **one HTTP call
-on Analyse**, then local interpolation of the cached risk curve — never a fetch
-per slider tick.
+### Backend
 
 ```bash
 cd backend
-python3.12 -m venv .venv   # Python 3.10+ required
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python3.12 -m venv .venv
+source .venv/bin/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+cp .env.example .env          # optional: DEEPSEEK_API_KEY=...
 uvicorn app.main:app --reload --port 8000
 ```
 
-With `VITE_ML_API_URL=http://localhost:8000` in `.env`, the UI talks to that
-API. If the API is down or unset, Analyse falls back to the demo mock and shows
-**Live ML temporarily unavailable · demo fallback** — it never silently pretends
-the mock is LightGBM.
-
-In summer / non-winter weather the product stays calm on purpose: **Winter
-hazard inactive** from live Open-Meteo conditions. The LightGBM score is still
-shown (not overwritten to zero). Use **See KAIROS in winter conditions** for the
-illustrative winter scenario — not claimed as a real labelled closure.
-
-### Journey map
-
-The default experience is the cinematic WebGPU road. **Plan journey** opens a
-temporary Kazakhstan map (MapLibre) for From/To selection, route drawing, and
-**approximate** model coverage around the seven trained corridor midpoints.
-Only matched trained segments receive LightGBM risk — arbitrary roads stay
-weather-only / not yet trained.
-
-**Analyze journey** returns to the WebGPU scene with risk/weather for the
-highest-risk covered segment (not a geographic twin of the whole route).
-**Change route** reopens the planner.
-
-### KAIROS Copilot (DeepSeek)
-
-Optional server-side assistant. Put the key only in `backend/.env`:
-
 ```bash
-# backend/.env
-DEEPSEEK_API_KEY=...
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-chat
+pytest -q                     # 27 tests, Open-Meteo mocked
+curl http://localhost:8000/health
 ```
 
-Without a key, Analyse / scrubber / WebGPU still work; Ask KAIROS shows
-unavailable. The LLM never sets the risk score.
+Model details, endpoints, and feature contract:
+[backend/README.md](backend/README.md)
 
-See [backend/README.md](backend/README.md) for the model bundle layout and API.
+---
 
-WebGPU is required for the 3D environment — Chrome 113+ on a desktop GPU. On a
-browser without it the product still runs: forecasts, departure advice and the
-historical replay all work against a static background. That is deliberate; the
-answer to "is the road closing" does not depend on whether your browser can
-rasterise snow.
+## Architecture (the two boundaries that matter)
 
-```bash
-npm run smoke -- <label>   # boot check + perf sample + screenshot, needs `npm run dev`
+```
+Browser                         API
+───────                         ───
+Plan journey (MapLibre)
+        │
+Analyze journey ─────────────► /api/journey/analyze
+        │                         coverage + LightGBM on matches
+        ▼
+Cinematic WebGPU ◄─────────── /api/predict (one shot + curve)
+  weatherDirector                 Open-Meteo → 44 features
+  scrubber → predictLocal()
+  Ask KAIROS ────────────────► /api/copilot | /api/journey/intelligence
 ```
 
-Captures land in `.snapshots/` (git-ignored). See [docs/BASELINE.md](docs/BASELINE.md)
-— in particular the section on judging visual parity, because two frames of this
-scene are never identical and a single screenshot pair proves nothing.
+**`services/predictionService.js`** — only prediction contract. Live or explicit
+demo fallback. Nothing in the shell talks to raw HTTP shapes.
 
-## What it does
-
-### The decision, not the weather
-
-Most tools show you `wind 27 m/s, snowfall 4.2 mm/h` and leave the inference to
-you. KAIROS's output is a departure recommendation solved from its own risk
-curve, so the advisory time and the percentage come from one model rather than
-being authored beside each other.
-
-### The environment is the argument
-
-Risk drives a single weather layer that controls fog, visibility, cloud cover,
-ambient light, exposure, contrast, bloom, sun shafts, wind, airborne blizzard
-and how buried the carriageway is. Every parameter eases at its own rate — air
-clears in seconds, lying snow does not — so a change reads as weather arriving
-rather than as a crossfade.
-
-At 21% the asphalt is dark and the markings are crisp. At 96% the road has gone.
-
-### Historical replay
-
-Plays a recorded closure through the *same* weather layer the live forecast
-drives, and ends on the gap that is the whole proposition: the road was shut at
-19:40; KAIROS crossed its advisory threshold at 15:21, **4h 19m earlier**.
-
-## Architecture
+**`app/weatherDirector.js`** — only path from weather → pixels. No shader owns
+a hardcoded storm; risk changes ease at different rates (air clears fast, lying
+snow does not).
 
 ```
 src/
-  app/        product state: weather data, the render mapping, cinematic camera,
-              the subject the scene is composed around, demo data
-  product/    the interface: shell, analyse flow, replay, no-WebGPU fallback
-  services/   the prediction boundary — live LightGBM or explicit demo fallback
-  road/       the highway corridor: layout, geometry, materials
-  terrain/    heightfield, clipmap, deformation state buffer
-  render/     sky + IBL, shadow cascades, depth prepass
-  post/       the post-processing chain
-  vfx/        GPU blizzard + pooled spray field
-  ui/         the development tuning overlay (?dev)
-  shaders/    all WGSL; lib/ holds the shared includes
+  product/    shell, route flow, journey map, replay
+  services/   predict, journey, routing, copilot
+  app/        weather state, director, cinematic camera
+  terrain/    heightfield, clipmap, deformation
+  road/       corridor geometry + materials
+  vfx/        GPU blizzard, spray
+  shaders/    all WGSL
+backend/
+  app/        FastAPI, features, coverage, journey, copilot
+  model/      BORAN_MODEL (immutable artifacts)
 ```
 
-Two boundaries matter more than the rest:
+---
 
-**`services/predictionService.js`** is the only prediction contract.
-Normalisation from the backend's wire format happens there, so exactly one file
-changes when the endpoint lands and nothing in `product/` or `app/` ever sees a
-raw response. `setPredictionService()` swaps the implementation.
+## Model (straight talk)
 
-**`app/weatherDirector.js`** is the only code that turns weather into pixels.
-Nothing else in the project reads a risk value and no shader carries a hardcoded
-storm state. That is what lets the model change without the environment noticing.
+- **Target:** CLOSE or RESTRICT within the next 6 hours
+- **Output:** risk in `[0, 1]` — useful ranking score, **not** a calibrated
+  probability for insurers
+- **Coverage:** seven republican corridor midpoints in `segments.json`
+- **Journey map:** OSRM geometry for any From/To; LightGBM only where the route
+  intersects trained buffers
 
-Every fabricated number lives in `app/demoData.js`, so it can be deleted rather
-than hunted for.
+That constraint is a feature. Judges can trust the labels.
 
-## Built on SNOWFLOW
-
-The snow rendering is not ours. KAIROS is built on
-[SNOWFLOW](https://github.com/Noniv/snowflow_demo), a real-time procedural snow
-tech demo (Babylon.js + WebGPU + hand-written WGSL), and the reason it looks the
-way it does is that its terrain, snow shading, atmosphere, shadows and post chain
-were already excellent.
-
-What we kept, unchanged where possible: the GPU-baked heightfield and its CPU
-mirror, the clipmap terrain, the snow material, the analytic Nishita sky and its
-SH ambient solve, the three-cascade PCSS shadows, the depth prepass, and the
-nine-pass post chain.
-
-What we removed: the game. The player character, cloth and fur simulation, the
-snow-surf wake, the five spells and every input binding. Those modules are still
-on disk and simply unreachable from the entry point.
-
-What we added: the graded highway corridor (carved into the heightfield bake, so
-the road sits on ground the CPU and GPU agree about), the road material, the
-cinematic camera, the weather layer, the GPU blizzard, and the product.
-
-Babylon.js is used as engine, scene, material and render-target plumbing. All
-shading is custom WGSL — no stock materials, no stock lights, no stock particles.
+---
 
 ## Status
 
-Hackathon MVP. The cinematic route view, departure scrubber, historical replay,
-no-WebGPU fallback, GPU blizzard, and live LightGBM backend (seven corridors)
-are in place. Without `VITE_ML_API_URL`, Analyse uses the demo mock with an
-explicit fallback banner.
+Hackathon MVP. Live path: plan → analyze → cinematic risk → scrubber → Copilot.
+Ship-ready locally; point `VITE_ML_API_URL` at the API for LightGBM.
+
+---
 
 ## Licence
 
-MIT. See [LICENSE](LICENSE).
+MIT — [LICENSE](LICENSE).
 
-There are no third-party assets. Every texture, environment map and piece of
-geometry is generated at load time on the GPU: the sky is an atmosphere
-integral, the terrain and snow grain are noise, and the road markings, wheel
-ruts and lying snow are evaluated procedurally in the fragment shader.
-
-Runtime dependency: `@babylonjs/core` (Apache-2.0). Build dependencies: Vite and
-playwright-core (MIT), neither of which ships in the output.
+No third-party art packs. Sky, terrain grain, ruts, and lying snow are
+procedural / GPU-evaluated. Runtime: `@babylonjs/core` (Apache-2.0).
+SNOWFLOW origin credited above.
