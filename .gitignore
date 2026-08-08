@@ -27,3 +27,10 @@ Thumbs.db
 *.webp
 *.mp4
 *.webm
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+!.env.example

@@ -1,0 +1,35 @@
+{
+  "project": "BORAN",
+  "model_type": "LightGBM binary classifier",
+  "target": "CLOSE or RESTRICT within next 6 hours",
+  "horizon_hours": 6,
+  "maximum_history_hours": 72,
+  "high_risk_threshold": 0.516360272356473,
+  "medium_risk_threshold": 0.28399814979606014,
+  "score_note": "Model output is used as a risk score; it is not claimed to be a perfectly calibrated probability.",
+  "weather_source": "Open-Meteo Historical Forecast API",
+  "weather_variables": [
+    "temperature_2m",
+    "relative_humidity_2m",
+    "precipitation",
+    "rain",
+    "snowfall",
+    "snow_depth",
+    "surface_pressure",
+    "visibility",
+    "wind_speed_10m",
+    "wind_gusts_10m"
+  ],
+  "selected_segments": [
+    "KAZ06__KM_1240_1362",
+    "ALMATY_TASHKENT_TERMEZ__KM_159_238",
+    "ALMATY_TASHKENT_TERMEZ__KM_534_593",
+    "ALMATY_TASHKENT_TERMEZ__KM_143_214",
+    "KAZ14__KM_12_216",
+    "MOMYSHULY_KOLTOGAN__KM_10_76",
+    "KAZ06__KM_1474_1806"
+  ],
+  "test_period": "2025-10-01 onward",
+  "feature_count": 44,
+  "best_iteration": 6
+}

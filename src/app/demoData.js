@@ -1,15 +1,10 @@
 /**
- * Demo data. Every fabricated number in BORAN lives in this file.
+ * Illustrative historical replay data.
  *
- * That is the whole point of it existing: the rendering systems, the weather
- * director and the product interface all take their values from live state, so
- * when the backend arrives this module is deleted rather than hunted for.
- *
- * The closure below is representative of the Astana–Karaganda corridor rather
- * than a record of a specific incident: the shape — a morning that looks
- * survivable, a wind that gets up through the afternoon, and an official
- * closure hours after the road had actually become dangerous — is the pattern
- * the product is arguing about.
+ * Kept separate from the live LightGBM path on purpose: this curve is not a
+ * model output. It demonstrates the product argument (advisory lead time vs
+ * official closure) for the Astana–Karaganda corridor pattern. Live Analyse
+ * uses trained road segments and never scores this route.
  */
 
 /**
@@ -41,7 +36,7 @@ export const CLOSURE_REPLAY = {
         { time: "11:00", risk: 0.34, note: "Drifting reported near Osakarovka" },
         { time: "12:30", risk: 0.46 },
         { time: "14:00", risk: 0.61, note: "Wind 17 m/s, visibility falling" },
-        { time: "15:30", risk: 0.71, note: "BORAN advisory threshold crossed" },
+        { time: "15:30", risk: 0.71, note: "Advisory threshold crossed (illustrative)" },
         { time: "17:00", risk: 0.83, note: "Visibility below 150 m" },
         { time: "18:30", risk: 0.92 },
         { time: "19:40", risk: 0.97, note: "Road closed" },
@@ -49,11 +44,9 @@ export const CLOSURE_REPLAY = {
 };
 
 /**
- * Risk at which BORAN would have advised against travel.
+ * Illustrative risk at which the product would have advised against travel.
  *
- * The replay's entire claim is the gap between this crossing and the official
- * closure, so it is defined once, here, and both the curve and the summary read
- * it rather than each carrying their own copy.
+ * The replay's claim is the gap between this crossing and the official closure.
  */
 export const ADVISORY_THRESHOLD = 0.70;
 

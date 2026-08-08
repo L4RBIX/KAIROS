@@ -44,6 +44,7 @@ import { weatherFromRisk } from "./app/weatherState.js";
 import { Shell } from "./product/shell.js";
 import { RouteFlow } from "./product/routeFlow.js";
 import { Replay } from "./product/replay.js";
+import { loadSegments } from "./services/predictionService.js";
 import { SprayField } from "./vfx/particles.js";
 import { BlizzardField } from "./vfx/blizzard.js";
 import { SpellLights } from "./spells/spellLights.js";
@@ -209,12 +210,17 @@ async function boot() {
     // Plain DOM over the canvas. It is created here but stays invisible until
     // `reveal()` at the end of boot.
     const shell = new Shell();
+    // Prefer the live catalog when the ML API is configured; keep the baked
+    // seven segments otherwise so Analyse never depends on a network round-trip
+    // just to populate the dropdown.
+    loadSegments().then((segments) => {
+        if (segments?.length) shell.setSegments(segments);
+    });
     // Choreographs the camera, the storm and the interface together. It is the
     // only place the timing of the analyse sequence is written down.
     const flow = new RouteFlow({ shell, weather, camera: rig });
-    // Plays a recorded closure through the same weather director the live
-    // prediction drives, which is the point: the storm the viewer watches build
-    // is produced by exactly the mechanism the forecast uses.
+    // Plays an illustrative recorded closure through the same weather director
+    // the live prediction drives — not a LightGBM score for Astana–Karaganda.
     const replay = new Replay({ shell, weather, camera: rig });
 
     // No character to report on; the overlay already renders a dash for it.

@@ -1,56 +1,71 @@
 /**
  * The prediction boundary.
  *
- * Everything upstream of this file is product and rendering; everything
- * downstream is a model. The visualisation must not be able to tell which
- * implementation answered, which is why the shape below is the *only* contract
- * and why the mock is a peer of the real service rather than a special case
- * inside it.
- *
- * The wire format the backend will eventually speak is snake_case
- * (`wind_speed`, `recommended_departure`, `risk_label`). Normalising it happens
- * here, at the edge, so exactly one file changes when that endpoint appears and
- * nothing in `product/` or `app/` ever sees a raw response.
+ * When `VITE_ML_API_URL` is set, Analyse uses the live LightGBM backend and
+ * caches its risk curve. The departure scrubber stays on `predictLocal`, which
+ * interpolates that curve synchronously — never an HTTP call per slider tick.
+ * Copilot / DeepSeek is never reached from this file.
  */
 
 import {
     predict as mockPredict,
     evaluate as mockEvaluate,
 } from "./mockPredictionService.js";
+import * as real from "./realPredictionService.js";
 
 /**
  * @typedef {{
- *   origin: string,
- *   destination: string,
- *   departure: string,   "HH:MM"
+ *   origin?: string,
+ *   destination?: string,
+ *   segmentId?: string,
+ *   label?: string,
+ *   departure: string,
  * }} RouteQuery
  */
 
 /**
  * @typedef {{
- *   risk: number,                 0..1
+ *   risk: number,
  *   riskLabel: string,
- *   windSpeed: number,            m/s
- *   snowfall: number,             mm/h
- *   visibility: number,           metres
- *   temperature: number,          degrees C
- *   recommendedDeparture: string, "HH:MM", or "" when leaving now is fine
+ *   windSpeed: number,
+ *   windGusts: number,
+ *   snowfall: number,
+ *   visibility: number,
+ *   temperature: number,
+ *   recommendedDeparture: string,
  *   headline: string,
  *   detail: string,
+ *   source?: string,
+ *   winterHazardActive?: boolean,
+ *   seasonalContext?: string,
+ *   seasonalReason?: string,
+ *   oodCaution?: boolean,
+ *   assessment?: {
+ *     verdict: string,
+ *     title: string,
+ *     summary: string,
+ *     bestWindow: string,
+ *     primaryConcerns: string[],
+ *     quickPrompts: string[],
+ *   },
  * }} Prediction
  */
 
+/** @type {"live"|"fallback"|"unknown"} */
+export let predictionMode = "unknown";
+
 /**
- * Normalise a backend response into the shape the product uses.
- * Exported because the real service will need exactly this and nothing else.
  * @param {any} raw
  * @returns {Prediction}
  */
 export function normalise(raw) {
+    const seasonal = raw.seasonal || {};
+    const assessment = raw.assessment || null;
     return {
         risk: Number(raw.risk) || 0,
         riskLabel: raw.risk_label ?? raw.riskLabel ?? "",
         windSpeed: Number(raw.wind_speed ?? raw.windSpeed) || 0,
+        windGusts: Number(raw.wind_gusts ?? raw.windGusts ?? raw.wind_speed ?? raw.windSpeed) || 0,
         snowfall: Number(raw.snowfall) || 0,
         visibility: Number(raw.visibility) || 0,
         temperature: Number(raw.temperature) || 0,
@@ -58,18 +73,33 @@ export function normalise(raw) {
             raw.recommended_departure ?? raw.recommendedDeparture ?? "",
         headline: raw.headline ?? "",
         detail: raw.detail ?? "",
+        source: raw.source ?? "",
+        winterHazardActive:
+            seasonal.winter_hazard_active ??
+            raw.winterHazardActive ??
+            raw.winter_hazard_active,
+        seasonalContext:
+            seasonal.seasonal_context ??
+            raw.seasonalContext ??
+            "",
+        seasonalReason: seasonal.reason ?? raw.seasonalReason ?? "",
+        oodCaution: Boolean(seasonal.ood_caution ?? raw.oodCaution),
+        assessment: assessment
+            ? {
+                verdict: assessment.verdict,
+                title: assessment.title,
+                summary: assessment.summary,
+                bestWindow: assessment.best_window ?? assessment.bestWindow ?? "",
+                primaryConcerns:
+                    assessment.primary_concerns ?? assessment.primaryConcerns ?? [],
+                quickPrompts:
+                    assessment.quick_prompts ?? assessment.quickPrompts ?? [],
+            }
+            : undefined,
     };
 }
 
-/**
- * The active implementation.
- *
- * Swapping this for a `fetch`-backed service is the whole of the integration
- * work; no caller changes. See `mockPredictionService.js` for the contract it
- * has to satisfy.
- *
- * @type {(q: RouteQuery) => Promise<Prediction>}
- */
+/** @type {(q: RouteQuery) => Promise<Prediction>} */
 let impl = mockPredict;
 
 /** @param {(q: RouteQuery) => Promise<Prediction>} fn */
@@ -78,33 +108,67 @@ export function setPredictionService(fn) {
 }
 
 /**
- * A synchronous local estimate, for continuous scrubbing.
- *
- * Explicitly *not* `impl`. The departure slider recomputes on every input
- * event, and awaiting a network round trip per event would either lag the drag
- * or race itself; debouncing would break the one thing the interaction exists
- * for, which is watching the road change while the handle moves.
- *
- * With a real backend this stays a local function. The integration is to fetch
- * the risk curve once per route — the response already describes a day — and
- * interpolate it here, rather than to make this call out.
- *
  * @param {RouteQuery} query
  * @returns {Prediction}
  */
 export function predictLocal(query) {
-    return normalise(mockEvaluate(query));
+    if (real.getCachedCurve()) {
+        try {
+            return normalise(real.evaluateLocal(query));
+        } catch (err) {
+            console.warn("[kairos] local ML interpolate failed, using mock", err);
+        }
+    }
+    return normalise(mockEvaluate({
+        origin: query.origin || query.segmentId || "A",
+        destination: query.destination || query.label || "B",
+        departure: query.departure,
+    }));
 }
 
 /**
- * Ask for a prediction.
- *
- * Normalisation happens here rather than in each implementation, so a service
- * may answer in the backend's own wire format and still satisfy the contract.
- *
  * @param {RouteQuery} query
  * @returns {Promise<Prediction>}
  */
 export async function predict(query) {
+    const base = real.getApiBase();
+    if (base) {
+        try {
+            const p = normalise(await real.predict(query));
+            predictionMode = "live";
+            return p;
+        } catch (err) {
+            console.warn("[kairos] live ML unavailable · demo fallback", err);
+            predictionMode = "fallback";
+            real.setMlStatus("fallback");
+            real.clearCache();
+            const mock = await mockPredict({
+                origin: query.origin || query.segmentId || "A",
+                destination: query.destination || query.label || "B",
+                departure: query.departure,
+            });
+            return normalise({ ...mock, source: "demo-fallback" });
+        }
+    }
+    predictionMode = "fallback";
     return normalise(await impl(query));
+}
+
+export async function loadSegments() {
+    if (!real.getApiBase()) return null;
+    try {
+        return await real.fetchSegments();
+    } catch (err) {
+        console.warn("[kairos] segment catalog unavailable", err);
+        return null;
+    }
+}
+
+export function getPredictionMode() {
+    return predictionMode;
+}
+
+/** Cached ML curve for Copilot compare-times (no network). */
+export function getCachedCurve() {
+    return real.getCachedCurve();
 }

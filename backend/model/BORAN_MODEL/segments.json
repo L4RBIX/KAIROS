@@ -1,0 +1,65 @@
+{
+  "KAZ06__KM_1240_1362": {
+    "latitude": 46.91692,
+    "longitude": 61.3894,
+    "timezone": "Asia/Qyzylorda",
+    "geo_method": "fixed_midpoint_saksaul_aral",
+    "km_lo": 1240.0,
+    "km_hi": 1362.0,
+    "km_length": 122.0
+  },
+  "ALMATY_TASHKENT_TERMEZ__KM_159_238": {
+    "latitude": 43.35803,
+    "longitude": 74.63131,
+    "timezone": "Asia/Almaty",
+    "geo_method": "fixed_midpoint_kenen_kainar",
+    "km_lo": 159.0,
+    "km_hi": 238.0,
+    "km_length": 79.0
+  },
+  "ALMATY_TASHKENT_TERMEZ__KM_534_593": {
+    "latitude": 42.6184,
+    "longitude": 70.76952,
+    "timezone": "Asia/Almaty",
+    "geo_method": "fixed_bauyrzhan_momyshuly",
+    "km_lo": 534.0,
+    "km_hi": 593.0,
+    "km_length": 59.0
+  },
+  "ALMATY_TASHKENT_TERMEZ__KM_143_214": {
+    "latitude": 43.04663,
+    "longitude": 74.70747,
+    "timezone": "Asia/Almaty",
+    "geo_method": "fixed_korday",
+    "km_lo": 143.0,
+    "km_hi": 214.0,
+    "km_length": 71.0
+  },
+  "KAZ14__KM_12_216": {
+    "latitude": 45.67055,
+    "longitude": 66.12179,
+    "timezone": "Asia/Qyzylorda",
+    "geo_method": "fixed_interior_point",
+    "km_lo": 12.0,
+    "km_hi": 216.0,
+    "km_length": 204.0
+  },
+  "MOMYSHULY_KOLTOGAN__KM_10_76": {
+    "latitude": 42.6184,
+    "longitude": 70.76952,
+    "timezone": "Asia/Almaty",
+    "geo_method": "fixed_bauyrzhan_momyshuly",
+    "km_lo": 10.0,
+    "km_hi": 76.0,
+    "km_length": 66.0
+  },
+  "KAZ06__KM_1474_1806": {
+    "latitude": 45.34215,
+    "longitude": 63.82974,
+    "timezone": "Asia/Qyzylorda",
+    "geo_method": "fixed_midpoint_ayteke_bi_kyzylorda",
+    "km_lo": 1474.0,
+    "km_hi": 1806.0,
+    "km_length": 332.0
+  }
+}

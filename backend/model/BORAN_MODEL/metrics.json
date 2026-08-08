@@ -1,0 +1,14 @@
+{
+  "pr_auc": 0.21785535810638962,
+  "roc_auc": 0.671953253180559,
+  "precision": 0.3079470198675497,
+  "recall": 0.30392156862745096,
+  "f1": 0.3059210526315789,
+  "threshold": 0.516360272356473,
+  "event_hit_rate": 0.43137254901960786,
+  "median_warning_lead_hours": 5.5,
+  "negative_row_alert_rate": 0.0860082304526749,
+  "test_episodes": 51,
+  "test_positive_rows": 306,
+  "test_rows": 2736
+}

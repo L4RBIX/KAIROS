@@ -1,10 +1,10 @@
 /**
  * Historical replay.
  *
- * Plays a recorded day through the same weather director the live prediction
- * drives, so the storm the viewer watches build is produced by exactly the
- * mechanism the forecast uses. That is the argument: BORAN would have said this
- * hours before the barrier went across the road.
+ * Plays an illustrative recorded day through the same weather director the live
+ * prediction drives. This is not a LightGBM score for Astana–Karaganda; it
+ * shows the product argument — advisory lead time vs official closure — using
+ * the same weather layer the live forecast uses.
  *
  * The replay advances on the render loop's own clock via `update(dt)` rather
  * than on a timer, so it cannot drift away from what is on screen and it stops

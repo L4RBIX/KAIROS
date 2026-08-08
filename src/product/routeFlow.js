@@ -1,38 +1,22 @@
 /**
  * The analyse sequence.
  *
- * One place decides how a prediction becomes an experience: what the camera
- * does, when the storm starts arriving, and when the number appears. Spreading
- * that across the shell, the camera and the weather director would mean the
- * timing lived in three files and could only be tuned by reading all three.
- *
- * ## The timing, and why it is in this order
- *
- * The storm is deliberately started *before* the number is shown. If the result
- * lands first, the viewer reads "82%" and then watches some weather; the weather
- * becomes an illustration of a number they have already accepted. Started first,
- * they watch the road begin to disappear and the number arrives as the
- * explanation for something they have already felt. That ordering is the whole
- * difference between a dashboard with a nice background and a product whose
- * environment is the argument.
- *
- *   0.0s  form fades, camera begins its move toward the carriageway
- *   0.6s  prediction resolves (held)
- *   1.5s  weather target set — the storm starts arriving, slowly
- *   3.2s  camera settles; the risk figure fades up
- *
- * Nothing here polls. Each step is a timer, and `cancel()` drops them all so a
- * second analyse cannot interleave with the first.
+ * Slider → predictLocal() → weather only. Never DeepSeek. Never /api/predict
+ * while dragging.
  */
 
-import { predict, predictLocal } from "../services/predictionService.js";
+import {
+    predict,
+    predictLocal,
+    getPredictionMode,
+    getCachedCurve,
+} from "../services/predictionService.js";
+import { askCopilot } from "../services/copilotService.js";
 import { createWeatherState } from "../app/weatherState.js";
 import { minutesToClock } from "./shell.js";
 
-/** Milliseconds from the button to each beat of the sequence. */
 const T_WEATHER = 1500;
 const T_RESULT = 3200;
-/** Seconds the camera takes to reach the carriageway. */
 const CAM_MOVE = 3.4;
 
 export class RouteFlow {
@@ -50,41 +34,37 @@ export class RouteFlow {
 
         /** @type {number[]} */
         this._timers = [];
-        /** The prediction currently on screen, if any. */
         this.current = null;
-        /** The route it was made for. */
         this.route = null;
-
-        /** Fired once a result is on screen. The slider hangs off this. */
+        this.scrubClock = null;
         this.onResult = null;
 
         this.shell.onAnalyze = (route) => this.run(route);
         this.shell.el.back.addEventListener("click", () => this.reset());
 
-        // The departure scrubber. This is the interaction the demo turns on, so
-        // it is wired straight through with nothing in the way: input event ->
-        // synchronous local estimate -> weather target. The director's own
-        // easing does the smoothing, so dragging fast chases rather than snaps
-        // and there is no debounce to make the road lag the handle.
         this.shell.el.time.addEventListener("input", (e) => {
             if (!this.route) return;
             const clock = minutesToClock(+e.target.value);
             const p = predictLocal({
-                origin: this.route.from,
-                destination: this.route.to,
+                segmentId: this.route.segmentId,
+                label: this.route.label,
                 departure: clock,
             });
             this.current = p;
             this.scrubClock = clock;
             this.shell.updateScrub(p, clock);
             this.weather.setTarget(weatherFor(p));
-            this.shell.setStatus(
-                `${this.route.from} → ${this.route.to} · departing ${clock}`
-            );
+            this.shell.setStatus(`${this.route.label} · departing ${clock}`);
         });
+
+        // Copilot: only on explicit user actions.
+        this.shell.onCopilotAsk = (message, extras = {}) =>
+            this.askCopilot(message, extras);
+        this.shell.onWinterReplay = () => {
+            this.shell.replayEl.start?.click();
+        };
     }
 
-    /** Drop every pending step. */
     cancel() {
         for (const t of this._timers) clearTimeout(t);
         this._timers.length = 0;
@@ -95,86 +75,132 @@ export class RouteFlow {
     }
 
     /**
-     * Run the sequence for a route.
-     * @param {{from:string, to:string, departure:string}} route
+     * @param {{segmentId:string, label:string, departure:string}} route
      */
     async run(route) {
         this.cancel();
         this.route = route;
         this.shell.setBusy(true);
-        this.shell.setStatus("Analysing route conditions");
+        this.shell.setStatus("Analysing corridor conditions");
+        this.shell.closeCopilot();
 
-        // The camera starts moving immediately — before the answer is back. It
-        // is establishing the subject, and it would be establishing it either
-        // way, so there is no reason to make the viewer wait for a round trip.
         this.camera.cut("route", CAM_MOVE);
         this.shell.hideForm();
 
         let prediction;
         try {
             prediction = await predict({
-                origin: route.from,
-                destination: route.to,
+                segmentId: route.segmentId,
+                label: route.label,
                 departure: route.departure,
             });
+            this.shell.setPredictionMode(getPredictionMode());
         } catch (err) {
-            console.error("[boran] prediction failed", err);
-            this.shell.setStatus("Prediction unavailable");
+            console.error("[kairos] prediction failed", err);
+            this.shell.setPredictionMode(
+                "fallback",
+                "Live ML temporarily unavailable · demo fallback"
+            );
+            this.shell.setStatus("Prediction unavailable · try again");
             this.shell.showForm();
             return;
         }
 
         this.current = prediction;
+        this.scrubClock = route.departure;
 
         this._after(T_WEATHER, () => {
             this.weather.setTarget(weatherFor(prediction));
-            // A severe forecast drops the camera to the surface, where the
-            // carriageway fills the frame and snow closing over it is the
-            // subject rather than a detail in the middle distance.
-            if (prediction.risk >= 0.6) this.camera.cut("risk", 4.2);
+            if (
+                prediction.winterHazardActive !== false &&
+                prediction.risk >= 0.6
+            ) {
+                this.camera.cut("risk", 4.2);
+            }
         });
 
         this._after(T_RESULT, () => {
             this.shell.showResult(prediction, route);
-            // Park the handle on the time that was actually asked for, so the
-            // first drag continues from the answer rather than jumping.
             this.shell.setScrubTime(route.departure);
             this.shell.setStatus(
-                `${route.from} → ${route.to} · departing ${route.departure}`
+                `${route.label} · departing ${route.departure}`
             );
             this.onResult?.(prediction, route);
         });
     }
 
-    /** Back to the landing state. */
+    /**
+     * @param {string} message
+     * @param {{ compareTimes?: string[] }} [extras]
+     */
+    async askCopilot(message, extras = {}) {
+        if (!this.route || !this.current) return;
+        const departure = this.scrubClock || this.route.departure;
+        const locale = this.shell.getCopilotLocale();
+        const profile = this.shell.getCopilotProfile();
+
+        let compareTimes = extras.compareTimes || [];
+        if (!compareTimes.length && /compare|сравн|салыстыр/i.test(message)) {
+            const curve = getCachedCurve()?.curve || [];
+            if (curve.length >= 2) {
+                const mid = curve[Math.floor(curve.length * 0.35)]?.time;
+                compareTimes = [mid || "14:00", departure].filter(Boolean);
+            }
+        }
+
+        this.shell.setCopilotBusy(true);
+        try {
+            const res = await askCopilot({
+                message,
+                segmentId: this.route.segmentId,
+                departure,
+                locale,
+                profile,
+                compareTimes,
+                segmentLabel: this.route.label,
+            });
+            this.shell.showCopilotAnswer(res.answer, res.available !== false);
+        } catch (err) {
+            console.warn("[kairos] copilot unavailable", err);
+            this.shell.showCopilotAnswer(
+                "AI explanation temporarily unavailable.",
+                false
+            );
+        } finally {
+            this.shell.setCopilotBusy(false);
+        }
+    }
+
     reset() {
         this.cancel();
         this.current = null;
+        this.scrubClock = null;
+        this.shell.closeCopilot();
         this.shell.showForm();
         this.shell.setStatus("Kazakhstan · winter road network");
         this.camera.cut("landing", 3.0);
         this.weather.setTarget(weatherFor({
             risk: 0.12, windSpeed: 4, snowfall: 0.3,
             visibility: 860, temperature: -9,
+            winterHazardActive: true,
         }));
         this.onResult?.(null, null);
     }
 }
 
 /**
- * A prediction, as weather.
+ * Map prediction → weather for the director.
  *
- * The prediction already carries physical conditions, so this is a field copy
- * rather than a model — which is the point of the boundary. When the real
- * service starts returning measured values instead of derived ones, nothing
- * here changes.
+ * When live winter hazard is inactive, keep the scene calm. The real LightGBM
+ * score stays on screen — only the visual severity is restrained.
  */
 export function weatherFor(p) {
+    const calmLive = p.winterHazardActive === false;
     return createWeatherState({
-        risk: p.risk,
-        windSpeed: p.windSpeed,
-        snowfall: p.snowfall,
-        visibility: p.visibility,
+        risk: calmLive ? Math.min(0.07, (p.risk || 0) * 0.12) : p.risk,
+        windSpeed: calmLive ? Math.min(p.windSpeed || 4, 5.5) : p.windSpeed,
+        snowfall: calmLive ? 0 : p.snowfall,
+        visibility: calmLive ? Math.max(p.visibility || 0, 16000) : p.visibility,
         temperature: p.temperature,
     });
 }

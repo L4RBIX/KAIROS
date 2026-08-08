@@ -15,20 +15,62 @@ moment they chose. Drag the departure slider and the road disappears under
 drifting snow in front of you.
 
 ```
-ASTANA → KARAGANDA
-85%   SEVERE RISK
-Do not leave at this time.
-Recommended departure  before 11:56
+KAZ-06 · км 1240–1362
+62%   HIGH CLOSURE RISK
+High risk of closure or restriction.
+Recommended departure  before 14:00
 ```
 
 ## Running it
 
 ```bash
 npm install
-npm run dev       # vite dev server on :5173
-npm run build     # production build into dist/
-npm run preview   # serve the production build
+cp .env.example .env   # optional: point at the live ML API
+npm run dev            # vite dev server on :5173
+npm run build          # production build into dist/
+npm run preview        # serve the production build
 ```
+
+### Real ML backend
+
+Live Analyse scores one of seven trained road segments with LightGBM (44
+features from Open-Meteo). The departure scrubber stays smooth: **one HTTP call
+on Analyse**, then local interpolation of the cached risk curve — never a fetch
+per slider tick.
+
+```bash
+cd backend
+python3.12 -m venv .venv   # Python 3.10+ required
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+With `VITE_ML_API_URL=http://localhost:8000` in `.env`, the UI talks to that
+API. If the API is down or unset, Analyse falls back to the demo mock and shows
+**Live ML temporarily unavailable · demo fallback** — it never silently pretends
+the mock is LightGBM.
+
+In summer / non-winter weather the product stays calm on purpose: **Winter
+hazard inactive** from live Open-Meteo conditions. The LightGBM score is still
+shown (not overwritten to zero). Use **See KAIROS in winter conditions** for the
+illustrative winter scenario — not claimed as a real labelled closure.
+
+### KAIROS Copilot (DeepSeek)
+
+Optional server-side assistant. Put the key only in `backend/.env`:
+
+```bash
+# backend/.env
+DEEPSEEK_API_KEY=...
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+Without a key, Analyse / scrubber / WebGPU still work; Ask KAIROS shows
+unavailable. The LLM never sets the risk score.
+
+See [backend/README.md](backend/README.md) for the model bundle layout and API.
 
 WebGPU is required for the 3D environment — Chrome 113+ on a desktop GPU. On a
 browser without it the product still runs: forecasts, departure advice and the
@@ -76,7 +118,7 @@ src/
   app/        product state: weather data, the render mapping, cinematic camera,
               the subject the scene is composed around, demo data
   product/    the interface: shell, analyse flow, replay, no-WebGPU fallback
-  services/   the prediction boundary — mock now, ML backend later
+  services/   the prediction boundary — live LightGBM or explicit demo fallback
   road/       the highway corridor: layout, geometry, materials
   terrain/    heightfield, clipmap, deformation state buffer
   render/     sky + IBL, shadow cascades, depth prepass
@@ -127,8 +169,9 @@ shading is custom WGSL — no stock materials, no stock lights, no stock particl
 ## Status
 
 Hackathon MVP. The cinematic route view, departure scrubber, historical replay,
-fallback, and GPU-driven blizzard are in place. Prediction is currently mocked
-behind `services/predictionService.js` for a future ML backend.
+no-WebGPU fallback, GPU blizzard, and live LightGBM backend (seven corridors)
+are in place. Without `VITE_ML_API_URL`, Analyse uses the demo mock with an
+explicit fallback banner.
 
 ## Licence
 
