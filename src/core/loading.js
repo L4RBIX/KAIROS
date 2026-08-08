@@ -25,7 +25,7 @@ export function nextFrame() {
 export async function phase(text, to) {
     if (label) label.textContent = text;
     progress = Math.max(progress, to);
-    if (bar) bar.style.width = (progress * 100).toFixed(1) + "%";
+    if (bar) bar.style.transform = `scaleX(${progress.toFixed(4)})`;
     await nextFrame();
 }
 

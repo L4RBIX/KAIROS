@@ -114,7 +114,7 @@ export function startFallback(reason) {
         `<b>Live road visualisation unavailable.</b> ` +
         (reason || "This browser does not support WebGPU.") +
         ` Forecasts, departure advice and historical replay all work below; ` +
-        `open BORAN in Chrome 113+ on a desktop GPU for the 3D route view.`;
+        `open KAIROS in Chrome 113+ on a desktop GPU for the 3D route view.`;
     shell.el.form.appendChild(note);
 
     shell.reveal();

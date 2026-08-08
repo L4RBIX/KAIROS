@@ -240,7 +240,7 @@ Shell.prototype.updateReplay = function (s) {
     if (s.closed && !e.verdict.classList.contains("b-shown")) {
         e.verdict.innerHTML =
             `<strong>Road closed &middot; ${s.closedAt}</strong>` +
-            `<span>BORAN crossed ${Math.round(s.threshold * 100)}% risk at ` +
+            `<span>KAIROS crossed ${Math.round(s.threshold * 100)}% risk at ` +
             `${s.crossingClock} &mdash; <b>${s.lead} earlier</b></span>`;
         e.verdict.classList.add("b-shown");
     }
@@ -265,7 +265,7 @@ function fillCities(select, initial) {
 
 const MARKUP = `
 <header class="b-top">
-    <div class="b-mark b-rise b-d1">BORAN</div>
+    <div class="b-mark b-rise b-d1">KAIROS</div>
     <div class="b-loc b-rise b-d1" id="b-loc">Kazakhstan &middot; winter road network</div>
 </header>
 

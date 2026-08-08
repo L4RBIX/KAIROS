@@ -1,4 +1,6 @@
-# BORAN
+# KAIROS
+
+**Kairos (Καιρός)** — the right moment; the ideal time to act.
 
 **Know the road before it closes.**
 
@@ -6,7 +8,7 @@ An AI-assisted road-safety decision tool for Kazakhstan's winter highway
 network, with a real-time WebGPU environment that *is* the explanation rather
 than a backdrop to it.
 
-A driver enters a route and a departure time. BORAN answers the question they
+A driver enters a route and a departure time. KAIROS answers the question they
 actually have — *should I leave now, later, or not at all?* — and then shows
 them the road they would be driving on, in the conditions predicted for the
 moment they chose. Drag the departure slider and the road disappears under
@@ -47,17 +49,17 @@ scene are never identical and a single screenshot pair proves nothing.
 ### The decision, not the weather
 
 Most tools show you `wind 27 m/s, snowfall 4.2 mm/h` and leave the inference to
-you. BORAN's output is a departure recommendation solved from its own risk
+you. KAIROS's output is a departure recommendation solved from its own risk
 curve, so the advisory time and the percentage come from one model rather than
 being authored beside each other.
 
 ### The environment is the argument
 
 Risk drives a single weather layer that controls fog, visibility, cloud cover,
-ambient light, exposure, contrast, bloom, sun shafts, wind and how buried the
-carriageway is. Every parameter eases at its own rate — air clears in seconds,
-lying snow does not — so a change reads as weather arriving rather than as a
-crossfade.
+ambient light, exposure, contrast, bloom, sun shafts, wind, airborne blizzard
+and how buried the carriageway is. Every parameter eases at its own rate — air
+clears in seconds, lying snow does not — so a change reads as weather arriving
+rather than as a crossfade.
 
 At 21% the asphalt is dark and the markings are crisp. At 96% the road has gone.
 
@@ -65,7 +67,7 @@ At 21% the asphalt is dark and the markings are crisp. At 96% the road has gone.
 
 Plays a recorded closure through the *same* weather layer the live forecast
 drives, and ends on the gap that is the whole proposition: the road was shut at
-19:40; BORAN crossed its advisory threshold at 15:21, **4h 19m earlier**.
+19:40; KAIROS crossed its advisory threshold at 15:21, **4h 19m earlier**.
 
 ## Architecture
 
@@ -79,7 +81,7 @@ src/
   terrain/    heightfield, clipmap, deformation state buffer
   render/     sky + IBL, shadow cascades, depth prepass
   post/       the post-processing chain
-  vfx/        pooled particles
+  vfx/        GPU blizzard + pooled spray field
   ui/         the development tuning overlay (?dev)
   shaders/    all WGSL; lib/ holds the shared includes
 ```
@@ -100,7 +102,7 @@ than hunted for.
 
 ## Built on SNOWFLOW
 
-The snow rendering is not ours. BORAN is built on
+The snow rendering is not ours. KAIROS is built on
 [SNOWFLOW](https://github.com/Noniv/snowflow_demo), a real-time procedural snow
 tech demo (Babylon.js + WebGPU + hand-written WGSL), and the reason it looks the
 way it does is that its terrain, snow shading, atmosphere, shadows and post chain
@@ -117,17 +119,16 @@ on disk and simply unreachable from the entry point.
 
 What we added: the graded highway corridor (carved into the heightfield bake, so
 the road sits on ground the CPU and GPU agree about), the road material, the
-cinematic camera, the weather layer, and the product.
+cinematic camera, the weather layer, the GPU blizzard, and the product.
 
 Babylon.js is used as engine, scene, material and render-target plumbing. All
 shading is custom WGSL — no stock materials, no stock lights, no stock particles.
 
 ## Status
 
-This is a hackathon MVP. Known limitations are listed in the final stage report;
-the significant one is that there are no airborne snow particles — the storm is
-carried by fog, cloud, exposure and accumulation on the road surface, not by
-falling or blowing snow.
+Hackathon MVP. The cinematic route view, departure scrubber, historical replay,
+fallback, and GPU-driven blizzard are in place. Prediction is currently mocked
+behind `services/predictionService.js` for a future ML backend.
 
 ## Licence
 

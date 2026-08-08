@@ -1,7 +1,7 @@
 {
-  "name": "boran",
+  "name": "kairos",
   "version": "1.0.0",
-  "description": "Road-closure risk for Kazakhstan's winter highways, with a real-time WebGPU environment that explains the forecast",
+  "description": "KAIROS (Kairos / Καιρός) — road-closure risk for Kazakhstan's winter highways, with a real-time WebGPU environment that explains the forecast",
   "type": "module",
   "scripts": {
     "dev": "vite",
