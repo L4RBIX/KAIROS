@@ -1,0 +1,590 @@
+/**
+ * The product interface's stylesheet.
+ *
+ * Kept as a module rather than a `.css` file to match `ui/overlay.js`, which
+ * already injects its own styles this way — one convention for "UI that owns
+ * its own appearance" rather than two.
+ *
+ * ## Direction
+ *
+ * The 3D is the product. Everything here is a caption on it, so the interface
+ * gets type, spacing and one hairline, and almost nothing else: no cards, no
+ * panels, no fills, no shadows behind boxes. What separates the text from the
+ * snow is a very slight scrim and the type's own weight, because an opaque panel
+ * over this environment would be the moment it stopped looking expensive.
+ *
+ * The palette is the boot screen's, extended. Cold, desaturated, and only one
+ * accent — which is spent on risk and nothing else, so that when it appears it
+ * means something.
+ */
+
+export const CSS = `
+:root {
+    --b-ink:      #070b12;
+    --b-frost:    #e8f0f8;
+    --b-dim:      #8fa1b5;
+    --b-faint:    rgba(232, 240, 248, 0.42);
+    --b-line:     rgba(232, 240, 248, 0.20);
+    --b-accent:   #8fc4e8;
+    --b-warn:     #e8b04f;
+    --b-danger:   #e8734f;
+    --b-ease:     cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#boran {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(22px, 3.4vw, 54px);
+    pointer-events: none;
+    color: var(--b-frost);
+    font-family: ui-sans-serif, "Inter", "Segoe UI", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    /* A scrim weighted to the lower left, where the type sits. Radial rather
+       than linear so it never draws an edge across the sky.
+       Sunlit snow exposes near white, and the type sits directly on it — at a
+       weaker scrim the muted second line of the headline fell below readable
+       contrast. Two stacked gradients: a broad one that lifts the whole left
+       third, and a tighter one under the form itself. */
+    background:
+        radial-gradient(85% 70% at 2% 78%, rgba(5, 9, 15, 0.90) 0%,
+                        rgba(5, 9, 15, 0.55) 42%, rgba(5, 9, 15, 0) 76%),
+        linear-gradient(105deg, rgba(5, 9, 15, 0.60) 0%,
+                        rgba(5, 9, 15, 0.22) 34%, rgba(5, 9, 15, 0) 62%);
+    opacity: 0;
+    transition: opacity 1200ms var(--b-ease);
+}
+#boran.ready { opacity: 1; }
+
+#boran a, #boran button, #boran input, #boran select { pointer-events: auto; }
+
+/* ------------------------------------------------------------------ header */
+
+.b-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.b-mark {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.52em;
+    text-indent: 0.52em;
+    color: var(--b-frost);
+}
+
+.b-loc {
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------- panel */
+
+.b-panel {
+    max-width: min(680px, 92vw);
+    /* The form and the result share one cell, so the panel is always as tall as
+       whichever is showing and the flex column can still lay the page out
+       around it. Absolutely positioning the result instead took it out of flow,
+       and it ran off the bottom of the viewport the moment it was taller than
+       the form it replaced. */
+    display: grid;
+    align-items: start;
+}
+#b-form, .b-result { grid-area: 1 / 1; }
+
+.b-lede {
+    font-size: clamp(30px, 4.6vw, 62px);
+    font-weight: 200;
+    line-height: 1.02;
+    letter-spacing: -0.022em;
+    margin-bottom: clamp(24px, 3vw, 44px);
+    text-wrap: balance;
+}
+.b-lede em {
+    font-style: normal;
+    /* Lighter than --b-dim. The hierarchy still reads, and this line has to
+       hold against sunlit snow, which --b-dim does not. */
+    color: #b6c6d8;
+    display: block;
+}
+
+/* --------------------------------------------------------------- the form */
+
+.b-fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(20px, 3vw, 44px);
+    margin-bottom: clamp(26px, 3vw, 40px);
+}
+
+.b-field { min-width: 0; }
+
+.b-field label {
+    display: block;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+    margin-bottom: 9px;
+}
+
+.b-field select,
+.b-field input {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--b-line);
+    border-radius: 0;
+    padding: 0 0 8px;
+    width: 100%;
+    min-width: 148px;
+    color: var(--b-frost);
+    font: inherit;
+    font-size: clamp(17px, 1.6vw, 22px);
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 260ms var(--b-ease), color 260ms var(--b-ease);
+}
+.b-field input { cursor: text; font-variant-numeric: tabular-nums; }
+/* Chrome draws a clock glyph inside time inputs. It is the one piece of
+   browser chrome in the interface and it is the wrong century. */
+.b-field input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
+.b-field input[type="time"] { min-width: 108px; }
+
+.b-field select:hover,
+.b-field input:hover { border-bottom-color: rgba(232, 240, 248, 0.42); }
+.b-field select:focus-visible,
+.b-field input:focus-visible { border-bottom-color: var(--b-accent); }
+
+/* The native dropdown list is the one thing here that cannot be styled to
+   match, so it is at least made legible against a dark chrome. */
+.b-field select option { background: #0d141f; color: var(--b-frost); }
+
+/* -------------------------------------------------------------- the button */
+
+.b-go {
+    position: relative;
+    background: transparent;
+    color: var(--b-frost);
+    border: 1px solid var(--b-line);
+    border-radius: 0;
+    padding: 17px 34px;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.30em;
+    text-indent: 0.30em;
+    text-transform: uppercase;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 400ms var(--b-ease), color 400ms var(--b-ease);
+}
+/* A wipe rather than a fill-on-hover: it reads as deliberate at this scale,
+   where an instant background change reads as a default. */
+.b-go::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--b-frost);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 520ms var(--b-ease);
+    z-index: -1;
+}
+.b-go:hover { border-color: var(--b-frost); }
+.b-go:hover::after { transform: scaleX(1); }
+.b-go:hover { color: var(--b-ink); }
+.b-go:focus-visible { border-color: var(--b-accent); outline: none; }
+.b-go[disabled] { opacity: 0.4; cursor: default; }
+.b-go[disabled]:hover::after { transform: scaleX(0); }
+.b-go[disabled]:hover { color: var(--b-frost); border-color: var(--b-line); }
+
+/* ------------------------------------------------------------------ result */
+
+/* The form and the result occupy the same corner. Neither is ever laid out
+   beside the other, so they cross-fade in place — which is what makes the
+   analyse sequence read as one view changing rather than two screens. */
+#b-form {
+    transition: opacity 620ms var(--b-ease), transform 620ms var(--b-ease);
+}
+#b-form.b-gone {
+    opacity: 0;
+    transform: translate3d(0, -14px, 0);
+    pointer-events: none;
+}
+
+.b-result {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    pointer-events: none;
+    transition: opacity 900ms var(--b-ease), transform 900ms var(--b-ease);
+}
+.b-result.b-shown {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+}
+
+.b-route {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+    margin-bottom: clamp(10px, 1.4vw, 20px);
+}
+
+/* The number is the product. Everything else on screen is subordinate to it,
+   and at this size it carries from across a room — which is the actual test. */
+.b-pct {
+    /* Bounded by viewport *height* as well as width. The figure is the largest
+       thing on screen and on a short window it is what pushes the advisory off
+       the bottom — which is the one line that must never be lost. */
+    font-size: clamp(64px, min(11vw, 17vh), 152px);
+    font-weight: 200;
+    line-height: 0.86;
+    letter-spacing: -0.045em;
+    font-variant-numeric: tabular-nums;
+    color: var(--b-frost);
+    transition: color 700ms var(--b-ease);
+}
+
+.b-band {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.30em;
+    text-indent: 0.30em;
+    text-transform: uppercase;
+    margin-top: clamp(12px, 1.6vw, 22px);
+    color: var(--b-accent);
+    transition: color 700ms var(--b-ease);
+}
+
+/* The single accent in the interface, and it only ever means risk. */
+.b-result[data-band="high"]    .b-band { color: var(--b-warn); }
+.b-result[data-band="severe"]  .b-band,
+.b-result[data-band="extreme"] .b-band { color: var(--b-danger); }
+.b-result[data-band="severe"]  .b-pct,
+.b-result[data-band="extreme"] .b-pct { color: #f6dcd2; }
+
+.b-headline {
+    font-size: clamp(19px, 2.1vw, 27px);
+    font-weight: 300;
+    line-height: 1.24;
+    letter-spacing: -0.012em;
+    margin-top: clamp(20px, 2.4vw, 34px);
+    max-width: 22em;
+    text-wrap: balance;
+}
+
+.b-detail {
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.62;
+    color: var(--b-dim);
+    margin-top: 12px;
+    max-width: 34em;
+}
+
+.b-advice {
+    margin-top: clamp(18px, 2vw, 28px);
+    padding-top: 16px;
+    border-top: 1px solid var(--b-line);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--b-dim);
+    max-width: 34em;
+}
+.b-advice b {
+    color: var(--b-frost);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------- departure scrubber */
+
+.b-scrub {
+    margin-top: clamp(20px, 2.4vw, 32px);
+    max-width: 34em;
+}
+
+.b-scrub-label {
+    display: block;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+    margin-bottom: 12px;
+}
+.b-scrub-label b {
+    color: var(--b-frost);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.12em;
+}
+
+.b-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 22px;
+    background: transparent;
+    cursor: grab;
+    outline: none;
+}
+.b-slider:active { cursor: grabbing; }
+
+/* A hairline, not a groove. The track is a ruler the handle travels along, and
+   any fill or bevel on it competes with the figure above. */
+.b-slider::-webkit-slider-runnable-track {
+    height: 1px;
+    background: var(--b-line);
+}
+.b-slider::-moz-range-track {
+    height: 1px;
+    background: var(--b-line);
+}
+
+.b-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: var(--b-frost);
+    box-shadow: 0 0 0 6px rgba(232, 240, 248, 0.10);
+    transition: box-shadow 260ms var(--b-ease), background 400ms var(--b-ease);
+}
+.b-slider::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--b-frost);
+    box-shadow: 0 0 0 6px rgba(232, 240, 248, 0.10);
+}
+.b-slider:hover::-webkit-slider-thumb,
+.b-slider:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 9px rgba(232, 240, 248, 0.16);
+}
+
+/* The handle takes the risk colour, so the control itself carries the reading
+   even when the eye is on the road rather than on the number. */
+.b-result[data-band="high"]    .b-slider::-webkit-slider-thumb { background: var(--b-warn); }
+.b-result[data-band="severe"]  .b-slider::-webkit-slider-thumb,
+.b-result[data-band="extreme"] .b-slider::-webkit-slider-thumb { background: var(--b-danger); }
+.b-result[data-band="high"]    .b-slider::-moz-range-thumb { background: var(--b-warn); }
+.b-result[data-band="severe"]  .b-slider::-moz-range-thumb,
+.b-result[data-band="extreme"] .b-slider::-moz-range-thumb { background: var(--b-danger); }
+
+.b-scrub-ends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 9px;
+    letter-spacing: 0.20em;
+    color: var(--b-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.b-back {
+    margin-top: clamp(20px, 2.4vw, 32px);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--b-line);
+    border-radius: 0;
+    padding: 0 0 6px;
+    color: var(--b-faint);
+    font: inherit;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 300ms var(--b-ease), border-color 300ms var(--b-ease);
+}
+.b-back:hover { color: var(--b-frost); border-bottom-color: var(--b-frost); }
+
+.b-actions { display: flex; gap: clamp(18px, 2.4vw, 34px); flex-wrap: wrap; }
+
+/* ------------------------------------------------------------------ replay */
+
+#b-replay { grid-area: 1 / 1; }
+
+.b-replay {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    pointer-events: none;
+    transition: opacity 800ms var(--b-ease), transform 800ms var(--b-ease);
+}
+.b-replay.b-shown { opacity: 1; transform: none; pointer-events: auto; }
+
+.b-rp-head {
+    display: flex;
+    align-items: baseline;
+    gap: clamp(18px, 2.4vw, 34px);
+    margin-bottom: clamp(16px, 2vw, 26px);
+}
+
+.b-rp-clock {
+    font-size: clamp(46px, min(7vw, 11vh), 92px);
+    font-weight: 200;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+
+.b-rp-risk {
+    font-size: clamp(20px, 2.4vw, 32px);
+    font-weight: 300;
+    font-variant-numeric: tabular-nums;
+    color: var(--b-accent);
+    transition: color 600ms var(--b-ease);
+}
+.b-replay[data-band="high"]    .b-rp-risk { color: var(--b-warn); }
+.b-replay[data-band="severe"]  .b-rp-risk,
+.b-replay[data-band="extreme"] .b-rp-risk { color: var(--b-danger); }
+
+/* The timeline. A hairline that fills, with one tick on it — the moment BORAN
+   would have said stop. That single mark is the entire argument of the replay,
+   so nothing else on the track competes with it. */
+.b-rp-track {
+    position: relative;
+    height: 1px;
+    background: var(--b-line);
+    max-width: 34em;
+}
+.b-rp-fill {
+    position: absolute;
+    inset: 0;
+    background: var(--b-frost);
+    transform-origin: left;
+    transform: scaleX(0);
+}
+.b-rp-mark {
+    position: absolute;
+    /* The left offset is set from the data by Shell.enterReplay: it is the
+       advisory crossing's position within the recorded window, so it moves
+       whenever the dataset or the threshold does. Hardcoding it here was
+       already wrong by a percent within minutes of the dataset being written.
+       (No backticks in this file -- the whole stylesheet is one template
+       literal, and a stray one silently truncates it.) */
+    left: 0;
+    top: -5px;
+    width: 1px;
+    height: 11px;
+    background: var(--b-faint);
+    transition: background 500ms var(--b-ease);
+}
+.b-rp-mark span {
+    position: absolute;
+    left: 0;
+    top: 15px;
+    white-space: nowrap;
+    font-size: 8px;
+    letter-spacing: 0.20em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+    transition: color 500ms var(--b-ease);
+}
+.b-rp-mark span::after { content: "advisory"; }
+.b-rp-mark[data-on="1"] { background: var(--b-warn); }
+.b-rp-mark[data-on="1"] span { color: var(--b-warn); }
+
+.b-rp-note {
+    margin-top: 30px;
+    min-height: 1.6em;
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--b-dim);
+    max-width: 34em;
+}
+
+.b-rp-verdict {
+    margin-top: clamp(16px, 2vw, 24px);
+    padding-top: 16px;
+    border-top: 1px solid var(--b-line);
+    max-width: 34em;
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    transition: opacity 900ms var(--b-ease), transform 900ms var(--b-ease);
+}
+.b-rp-verdict.b-shown { opacity: 1; transform: none; }
+.b-rp-verdict strong {
+    display: block;
+    font-size: clamp(19px, 2.1vw, 26px);
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    color: var(--b-danger);
+    margin-bottom: 10px;
+}
+.b-rp-verdict span {
+    display: block;
+    font-size: 13px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--b-dim);
+}
+.b-rp-verdict b { color: var(--b-frost); font-weight: 500; }
+
+#b-replay .b-back { margin-top: clamp(20px, 2.4vw, 30px); }
+
+/* ------------------------------------------------------------------ footer */
+
+.b-foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+}
+
+/* -------------------------------------------------- entrance choreography */
+
+.b-rise { opacity: 0; transform: translate3d(0, 16px, 0); }
+#boran.ready .b-rise {
+    opacity: 1;
+    transform: none;
+    transition: opacity 1000ms var(--b-ease), transform 1000ms var(--b-ease);
+}
+#boran.ready .b-d1 { transition-delay: 120ms; }
+#boran.ready .b-d2 { transition-delay: 260ms; }
+#boran.ready .b-d3 { transition-delay: 400ms; }
+#boran.ready .b-d4 { transition-delay: 520ms; }
+#boran.ready .b-d5 { transition-delay: 640ms; }
+
+/* Anything that moves here is decoration on a decision. */
+@media (prefers-reduced-motion: reduce) {
+    #boran, #boran * {
+        transition-duration: 1ms !important;
+        transition-delay: 0ms !important;
+    }
+    .b-rise { opacity: 1; transform: none; }
+}
+
+@media (max-width: 620px) {
+    .b-lede { font-size: 30px; }
+    .b-fields { gap: 18px; }
+    .b-field select, .b-field input { min-width: 128px; font-size: 17px; }
+}
+`;

@@ -1,0 +1,29 @@
+{
+  "name": "boran",
+  "version": "1.0.0",
+  "description": "Road-closure risk for Kazakhstan's winter highways, with a real-time WebGPU environment that explains the forecast",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "smoke": "node tools/smoke.mjs"
+  },
+  "keywords": [
+    "webgpu",
+    "babylonjs",
+    "wgsl",
+    "road-safety",
+    "weather",
+    "kazakhstan",
+    "dataviz"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@babylonjs/core": "^9.18.0"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.62.1",
+    "vite": "^8.1.5"
+  }
+}
