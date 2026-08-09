@@ -69,6 +69,11 @@ export class Shell {
         this.replayEl = {
             panel: root.querySelector("#b-replay"),
             date: root.querySelector("#b-rp-date"),
+            datePick: root.querySelector("#b-rp-date-pick"),
+            scrub: root.querySelector("#b-rp-scrub"),
+            scrubEnds: root.querySelector("#b-rp-scrub-ends"),
+            timeRead: root.querySelector("#b-rp-time-read"),
+            play: root.querySelector("#b-rp-play"),
             clock: root.querySelector("#b-rp-clock"),
             risk: root.querySelector("#b-rp-risk"),
             fill: root.querySelector("#b-rp-fill"),
@@ -482,13 +487,25 @@ export class Shell {
     }
 }
 
+Shell.prototype.populateWinterScenarios = function (scenarios) {
+    const pick = this.replayEl.datePick;
+    if (!pick || !scenarios?.length) return;
+    pick.innerHTML = scenarios.map((s) =>
+        `<option value="${s.id}">${s.label} · ${s.route.from} → ${s.route.to}</option>`,
+    ).join("");
+};
+
 Shell.prototype.enterReplay = function (rec, markFraction) {
     this.setCopilotBusy(false);
     this._productMode = "winter_demo";
     this.setView("replay");
     this.replayEl.date.textContent =
-        `Winter scenario · illustrative demo · ${rec.route.from} → ${rec.route.to} · ${rec.label}`;
+        `Winter scenario · illustrative demo · ${rec.route.from} → ${rec.route.to}`;
+    if (this.replayEl.datePick && rec.id) {
+        this.replayEl.datePick.value = rec.id;
+    }
     this.replayEl.verdict.classList.remove("b-shown");
+    this.replayEl.verdict.innerHTML = "";
     this.replayEl.panel.dataset.band = "low";
     this.replayEl.mark.dataset.on = "0";
     this.replayEl.mark.style.left = (markFraction * 100).toFixed(2) + "%";
@@ -514,6 +531,9 @@ Shell.prototype.updateReplay = function (s) {
     if (e.clock.textContent !== s.clock) e.clock.textContent = s.clock;
     if (e.risk.textContent !== pct) e.risk.textContent = pct;
     if (e.note.textContent !== s.note) e.note.textContent = s.note;
+    if (e.timeRead && e.timeRead.textContent !== s.clock) {
+        e.timeRead.textContent = s.clock;
+    }
 
     e.fill.style.transform = `scaleX(${s.progress.toFixed(4)})`;
 
@@ -526,12 +546,16 @@ Shell.prototype.updateReplay = function (s) {
     const crossed = s.crossed ? "1" : "0";
     if (e.mark.dataset.on !== crossed) e.mark.dataset.on = crossed;
 
-    if (s.closed && !e.verdict.classList.contains("b-shown")) {
-        e.verdict.innerHTML =
+    if (s.closed) {
+        const html =
             `<strong>Road closed &middot; ${s.closedAt}</strong>` +
             `<span>Illustrative threshold ${Math.round(s.threshold * 100)}% at ` +
             `${s.crossingClock} &mdash; <b>${s.lead} earlier</b></span>`;
+        if (e.verdict.innerHTML !== html) e.verdict.innerHTML = html;
         e.verdict.classList.add("b-shown");
+    } else if (e.verdict.classList.contains("b-shown")) {
+        e.verdict.classList.remove("b-shown");
+        e.verdict.innerHTML = "";
     }
 };
 
@@ -772,6 +796,25 @@ const MARKUP = `
 
     <div id="b-replay" class="b-replay" aria-live="polite">
         <div class="b-route" id="b-rp-date"></div>
+        <div class="b-rp-controls">
+            <label class="b-rp-field" for="b-rp-date-pick">
+                <span>Scenario date</span>
+                <select id="b-rp-date-pick"></select>
+            </label>
+            <div class="b-rp-time">
+                <div class="b-rp-time-row">
+                    <label class="b-rp-field" for="b-rp-scrub">
+                        <span>Time <b id="b-rp-time-read">06:00</b></span>
+                    </label>
+                    <button class="b-rp-play" id="b-rp-play" type="button">Pause</button>
+                </div>
+                <input id="b-rp-scrub" type="range" min="360" max="1180" value="360" step="1"
+                       aria-label="Scenario time" />
+                <div class="b-rp-scrub-ends" id="b-rp-scrub-ends">
+                    <span>06:00</span><span>19:40</span>
+                </div>
+            </div>
+        </div>
         <div class="b-rp-head">
             <span class="b-rp-clock" id="b-rp-clock">06:00</span>
             <span class="b-rp-risk" id="b-rp-risk">11%</span>

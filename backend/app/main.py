@@ -62,6 +62,8 @@ def health() -> HealthResponse:
         model_type=str(rt.meta.get("model_type", "LightGBM")),
         feature_count=rt.feature_count,
         segment_count=rt.segment_count,
+        trained_segment_count=rt.trained_segment_count,
+        demo_coverage=rt.segment_count > rt.trained_segment_count,
         target=rt.meta.get("target"),
         medium_risk_threshold=rt.medium_threshold,
         high_risk_threshold=rt.high_threshold,
@@ -88,7 +90,8 @@ def list_segments() -> list[SegmentOut]:
                 latitude=seg.latitude,
                 longitude=seg.longitude,
                 km_length=seg.km_length,
-                geo_method="midpoint_buffer",
+                geo_method="midpoint_buffer" if seg.trained else "demo_corridor_midpoint",
+                trained=seg.trained,
                 coverage_note=(
                     f"Approximate corridor ~{coverage_radius_km(seg):.0f} km "
                     "around a representative midpoint — not a surveyed polyline."
@@ -144,6 +147,30 @@ async def predict(req: PredictRequest) -> PredictResponse:
         raise HTTPException(status_code=502, detail="prediction failed") from exc
 
 
+def _select_segments_to_score(matches: list[dict], limit: int = 3) -> list[str]:
+    """Trained matches first, then demo corridors spread across the route."""
+    trained = [m for m in matches if m.get("trained")]
+    picked = [m["segment_id"] for m in trained[:limit]]
+    if len(picked) >= limit:
+        return picked
+
+    others = sorted(
+        (m for m in matches if not m.get("trained")),
+        key=lambda m: m.get("route_position", 0.0),
+    )
+    if not others:
+        return picked
+
+    slots = limit - len(picked)
+    # Evenly spaced samples including both ends of the corridor list.
+    for k in range(slots):
+        idx = 0 if slots == 1 else round(k * (len(others) - 1) / (slots - 1))
+        sid = others[idx]["segment_id"]
+        if sid not in picked:
+            picked.append(sid)
+    return picked
+
+
 @app.post("/api/journey/analyze", response_model=JourneyAnalyzeResponse)
 async def journey_analyze(req: JourneyAnalyzeRequest) -> JourneyAnalyzeResponse:
     """
@@ -157,9 +184,11 @@ async def journey_analyze(req: JourneyAnalyzeRequest) -> JourneyAnalyzeResponse:
         total_km=req.distance_km,
     )
 
-    # Cap ML calls — nearest matches only (hackathon latency).
+    # Cap ML calls (hackathon latency). Surveyed segments go first; the rest of
+    # the budget is spread along the route so the "highest risk" section is not
+    # sampled from one cluster near the origin.
     matches = coverage.get("matches") or []
-    predict_ids = [m["segment_id"] for m in matches[:3]]
+    predict_ids = _select_segments_to_score(matches, limit=3)
 
     predictions: list[dict] = []
     for sid in predict_ids:

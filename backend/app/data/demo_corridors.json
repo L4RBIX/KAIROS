@@ -1,0 +1,2089 @@
+{
+ "generated_by": "tools/build_demo_corridors.py",
+ "spacing_km": 60.0,
+ "router": "https://router.project-osrm.org",
+ "corridors": 21,
+ "fallback_corridors": [],
+ "segments": {
+  "A2__KM_0_59": {
+   "latitude": 43.22143,
+   "longitude": 76.62397,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 58.9,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 0–59"
+  },
+  "A2__KM_59_118": {
+   "latitude": 43.3238,
+   "longitude": 75.94092,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 58.9,
+   "km_hi": 117.9,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 59–118"
+  },
+  "A2__KM_118_177": {
+   "latitude": 43.37877,
+   "longitude": 75.2242,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 117.9,
+   "km_hi": 176.8,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 118–177"
+  },
+  "A2__KM_177_236": {
+   "latitude": 43.13703,
+   "longitude": 74.70633,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 176.8,
+   "km_hi": 235.8,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 177–236"
+  },
+  "A2__KM_236_295": {
+   "latitude": 43.27054,
+   "longitude": 74.24199,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 235.8,
+   "km_hi": 294.7,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 236–295"
+  },
+  "A2__KM_295_354": {
+   "latitude": 43.07365,
+   "longitude": 73.68293,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 294.7,
+   "km_hi": 353.6,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 295–354"
+  },
+  "A2__KM_354_413": {
+   "latitude": 42.88181,
+   "longitude": 73.06107,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 353.6,
+   "km_hi": 412.6,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 354–413"
+  },
+  "A2__KM_413_472": {
+   "latitude": 42.97873,
+   "longitude": 72.37312,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 412.6,
+   "km_hi": 471.5,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 413–472"
+  },
+  "A2__KM_472_530": {
+   "latitude": 43.01095,
+   "longitude": 71.66215,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 471.5,
+   "km_hi": 530.5,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 472–530"
+  },
+  "A2__KM_530_589": {
+   "latitude": 42.78411,
+   "longitude": 71.04893,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 530.5,
+   "km_hi": 589.4,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 530–589"
+  },
+  "A2__KM_589_648": {
+   "latitude": 42.50866,
+   "longitude": 70.49714,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 589.4,
+   "km_hi": 648.3,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 589–648"
+  },
+  "A2__KM_648_707": {
+   "latitude": 42.47793,
+   "longitude": 69.83986,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 648.3,
+   "km_hi": 707.3,
+   "km_length": 58.9,
+   "label": "Алматы–Кордай–Тараз–Шымкент · км 648–707"
+  },
+  "A2W__KM_0_56": {
+   "latitude": 42.49657,
+   "longitude": 69.3701,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 56.5,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 0–56"
+  },
+  "A2W__KM_56_113": {
+   "latitude": 42.88401,
+   "longitude": 69.02411,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 56.5,
+   "km_hi": 113.0,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 56–113"
+  },
+  "A2W__KM_113_169": {
+   "latitude": 43.19536,
+   "longitude": 68.48917,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 113.0,
+   "km_hi": 169.5,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 113–169"
+  },
+  "A2W__KM_169_226": {
+   "latitude": 43.46394,
+   "longitude": 67.91912,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 169.5,
+   "km_hi": 226.0,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 169–226"
+  },
+  "A2W__KM_226_282": {
+   "latitude": 43.82533,
+   "longitude": 67.43575,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 226.0,
+   "km_hi": 282.5,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 226–282"
+  },
+  "A2W__KM_282_339": {
+   "latitude": 44.15879,
+   "longitude": 66.92861,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 282.5,
+   "km_hi": 338.9,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 282–339"
+  },
+  "A2W__KM_339_395": {
+   "latitude": 44.41025,
+   "longitude": 66.32518,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 338.9,
+   "km_hi": 395.4,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 339–395"
+  },
+  "A2W__KM_395_452": {
+   "latitude": 44.74691,
+   "longitude": 65.8124,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 395.4,
+   "km_hi": 451.9,
+   "km_length": 56.5,
+   "label": "Шымкент–Туркестан–Кызылорда · км 395–452"
+  },
+  "M32__KM_0_61": {
+   "latitude": 44.88497,
+   "longitude": 65.26408,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 61.5,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 0–61"
+  },
+  "M32__KM_61_123": {
+   "latitude": 44.97557,
+   "longitude": 64.56108,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 61.5,
+   "km_hi": 122.9,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 61–123"
+  },
+  "M32__KM_123_184": {
+   "latitude": 45.35678,
+   "longitude": 64.06257,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 122.9,
+   "km_hi": 184.4,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 123–184"
+  },
+  "M32__KM_184_246": {
+   "latitude": 45.75533,
+   "longitude": 63.6679,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 184.4,
+   "km_hi": 245.8,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 184–246"
+  },
+  "M32__KM_246_307": {
+   "latitude": 45.74364,
+   "longitude": 62.91273,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 245.8,
+   "km_hi": 307.3,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 246–307"
+  },
+  "M32__KM_307_369": {
+   "latitude": 45.86487,
+   "longitude": 62.17347,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 307.3,
+   "km_hi": 368.8,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 307–369"
+  },
+  "M32__KM_369_430": {
+   "latitude": 46.37351,
+   "longitude": 61.92103,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 368.8,
+   "km_hi": 430.2,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 369–430"
+  },
+  "M32__KM_430_492": {
+   "latitude": 46.80078,
+   "longitude": 61.66364,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 430.2,
+   "km_hi": 491.7,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 430–492"
+  },
+  "M32__KM_492_553": {
+   "latitude": 47.29029,
+   "longitude": 61.53398,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 491.7,
+   "km_hi": 553.1,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 492–553"
+  },
+  "M32__KM_553_615": {
+   "latitude": 47.80868,
+   "longitude": 61.3423,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 553.1,
+   "km_hi": 614.6,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 553–615"
+  },
+  "M32__KM_615_676": {
+   "latitude": 48.32491,
+   "longitude": 61.12182,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 614.6,
+   "km_hi": 676.1,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 615–676"
+  },
+  "M32__KM_676_738": {
+   "latitude": 48.39276,
+   "longitude": 60.55352,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 676.1,
+   "km_hi": 737.5,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 676–738"
+  },
+  "M32__KM_738_799": {
+   "latitude": 48.03882,
+   "longitude": 59.93497,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 737.5,
+   "km_hi": 799.0,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 738–799"
+  },
+  "M32__KM_799_860": {
+   "latitude": 47.95659,
+   "longitude": 59.39894,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 799.0,
+   "km_hi": 860.4,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 799–860"
+  },
+  "M32__KM_860_922": {
+   "latitude": 48.32865,
+   "longitude": 58.84718,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 860.4,
+   "km_hi": 921.9,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 860–922"
+  },
+  "M32__KM_922_983": {
+   "latitude": 48.67664,
+   "longitude": 58.29361,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 921.9,
+   "km_hi": 983.4,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 922–983"
+  },
+  "M32__KM_983_1045": {
+   "latitude": 49.11391,
+   "longitude": 57.81541,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 983.4,
+   "km_hi": 1044.8,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 983–1045"
+  },
+  "M32__KM_1045_1106": {
+   "latitude": 49.54763,
+   "longitude": 57.38856,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 1044.8,
+   "km_hi": 1106.3,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 1045–1106"
+  },
+  "M32__KM_1106_1168": {
+   "latitude": 50.06443,
+   "longitude": 57.34464,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 1106.3,
+   "km_hi": 1167.7,
+   "km_length": 61.5,
+   "label": "Кызылорда–Аральск–Шалкар–Актобе · км 1106–1168"
+  },
+  "M32W__KM_0_60": {
+   "latitude": 50.24714,
+   "longitude": 56.77825,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 59.6,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 0–60"
+  },
+  "M32W__KM_60_119": {
+   "latitude": 50.19648,
+   "longitude": 55.95621,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 59.6,
+   "km_hi": 119.2,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 60–119"
+  },
+  "M32W__KM_119_179": {
+   "latitude": 50.14675,
+   "longitude": 55.14158,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 119.2,
+   "km_hi": 178.8,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 119–179"
+  },
+  "M32W__KM_179_238": {
+   "latitude": 50.15844,
+   "longitude": 54.30821,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 178.8,
+   "km_hi": 238.4,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 179–238"
+  },
+  "M32W__KM_238_298": {
+   "latitude": 50.16694,
+   "longitude": 53.4914,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 238.4,
+   "km_hi": 298.0,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 238–298"
+  },
+  "M32W__KM_298_358": {
+   "latitude": 50.25719,
+   "longitude": 52.66734,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 298.0,
+   "km_hi": 357.6,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 298–358"
+  },
+  "M32W__KM_358_417": {
+   "latitude": 50.63688,
+   "longitude": 52.10613,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 357.6,
+   "km_hi": 417.2,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 358–417"
+  },
+  "M32W__KM_417_477": {
+   "latitude": 51.04525,
+   "longitude": 51.58075,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 417.2,
+   "km_hi": 476.8,
+   "km_length": 59.6,
+   "label": "Актобе–Уральск · км 417–477"
+  },
+  "A27__KM_0_62": {
+   "latitude": 50.06807,
+   "longitude": 57.34295,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 61.6,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 0–62"
+  },
+  "A27__KM_62_123": {
+   "latitude": 49.54982,
+   "longitude": 57.38727,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 61.6,
+   "km_hi": 123.2,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 62–123"
+  },
+  "A27__KM_123_185": {
+   "latitude": 49.23463,
+   "longitude": 56.88069,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 123.2,
+   "km_hi": 184.8,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 123–185"
+  },
+  "A27__KM_185_246": {
+   "latitude": 48.98008,
+   "longitude": 56.21947,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 184.8,
+   "km_hi": 246.5,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 185–246"
+  },
+  "A27__KM_246_308": {
+   "latitude": 48.57926,
+   "longitude": 55.68776,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 246.5,
+   "km_hi": 308.1,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 246–308"
+  },
+  "A27__KM_308_370": {
+   "latitude": 48.31246,
+   "longitude": 54.97805,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 308.1,
+   "km_hi": 369.7,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 308–370"
+  },
+  "A27__KM_370_431": {
+   "latitude": 47.98185,
+   "longitude": 54.34257,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 369.7,
+   "km_hi": 431.3,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 370–431"
+  },
+  "A27__KM_431_493": {
+   "latitude": 47.72846,
+   "longitude": 53.61772,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 431.3,
+   "km_hi": 492.9,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 431–493"
+  },
+  "A27__KM_493_555": {
+   "latitude": 47.50736,
+   "longitude": 52.90836,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 492.9,
+   "km_hi": 554.5,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 493–555"
+  },
+  "A27__KM_555_616": {
+   "latitude": 47.26211,
+   "longitude": 52.23881,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 554.5,
+   "km_hi": 616.2,
+   "km_length": 61.6,
+   "label": "Актобе–Кандыагаш–Атырау · км 555–616"
+  },
+  "M32A__KM_0_64": {
+   "latitude": 51.02371,
+   "longitude": 51.19915,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 63.6,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 0–64"
+  },
+  "M32A__KM_64_127": {
+   "latitude": 50.48558,
+   "longitude": 51.03796,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 63.6,
+   "km_hi": 127.1,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 64–127"
+  },
+  "M32A__KM_127_191": {
+   "latitude": 49.96134,
+   "longitude": 51.26603,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 127.1,
+   "km_hi": 190.7,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 127–191"
+  },
+  "M32A__KM_191_254": {
+   "latitude": 49.44111,
+   "longitude": 51.57657,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 190.7,
+   "km_hi": 254.2,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 191–254"
+  },
+  "M32A__KM_254_318": {
+   "latitude": 48.97061,
+   "longitude": 51.79307,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 254.2,
+   "km_hi": 317.8,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 254–318"
+  },
+  "M32A__KM_318_381": {
+   "latitude": 48.45323,
+   "longitude": 51.54469,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 317.8,
+   "km_hi": 381.4,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 318–381"
+  },
+  "M32A__KM_381_445": {
+   "latitude": 47.89628,
+   "longitude": 51.57509,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 381.4,
+   "km_hi": 444.9,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 381–445"
+  },
+  "M32A__KM_445_508": {
+   "latitude": 47.37076,
+   "longitude": 51.75845,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 444.9,
+   "km_hi": 508.5,
+   "km_length": 63.6,
+   "label": "Уральск–Атырау · км 445–508"
+  },
+  "A33__KM_0_60": {
+   "latitude": 47.25804,
+   "longitude": 52.23046,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 60.0,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 0–60"
+  },
+  "A33__KM_60_120": {
+   "latitude": 47.49646,
+   "longitude": 52.88103,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 60.0,
+   "km_hi": 120.0,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 60–120"
+  },
+  "A33__KM_120_180": {
+   "latitude": 47.47308,
+   "longitude": 53.61417,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 120.0,
+   "km_hi": 180.0,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 120–180"
+  },
+  "A33__KM_180_240": {
+   "latitude": 47.04914,
+   "longitude": 54.05668,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 180.0,
+   "km_hi": 240.0,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 180–240"
+  },
+  "A33__KM_240_300": {
+   "latitude": 46.58874,
+   "longitude": 54.22324,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 240.0,
+   "km_hi": 300.0,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 240–300"
+  },
+  "A33__KM_300_360": {
+   "latitude": 46.11618,
+   "longitude": 54.53112,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 300.0,
+   "km_hi": 360.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 300–360"
+  },
+  "A33__KM_360_420": {
+   "latitude": 45.65027,
+   "longitude": 54.91552,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 360.1,
+   "km_hi": 420.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 360–420"
+  },
+  "A33__KM_420_480": {
+   "latitude": 45.21853,
+   "longitude": 55.13536,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 420.1,
+   "km_hi": 480.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 420–480"
+  },
+  "A33__KM_480_540": {
+   "latitude": 44.85439,
+   "longitude": 54.67228,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 480.1,
+   "km_hi": 540.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 480–540"
+  },
+  "A33__KM_540_600": {
+   "latitude": 44.5708,
+   "longitude": 54.02811,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 540.1,
+   "km_hi": 600.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 540–600"
+  },
+  "A33__KM_600_660": {
+   "latitude": 44.22589,
+   "longitude": 53.45581,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 600.1,
+   "km_hi": 660.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 600–660"
+  },
+  "A33__KM_660_720": {
+   "latitude": 44.1718,
+   "longitude": 52.77792,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 660.1,
+   "km_hi": 720.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 660–720"
+  },
+  "A33__KM_720_780": {
+   "latitude": 44.08264,
+   "longitude": 52.21017,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 720.1,
+   "km_hi": 780.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 720–780"
+  },
+  "A33__KM_780_840": {
+   "latitude": 43.59904,
+   "longitude": 52.12997,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 780.1,
+   "km_hi": 840.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 780–840"
+  },
+  "A33__KM_840_900": {
+   "latitude": 43.59882,
+   "longitude": 51.5076,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 840.1,
+   "km_hi": 900.1,
+   "km_length": 60.0,
+   "label": "Атырау–Бейнеу–Актау · км 840–900"
+  },
+  "A3__KM_0_65": {
+   "latitude": 43.50999,
+   "longitude": 76.99798,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 65.1,
+   "km_length": 65.1,
+   "label": "Алматы–Талдыкорган · км 0–65"
+  },
+  "A3__KM_65_130": {
+   "latitude": 43.96633,
+   "longitude": 77.29716,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 65.1,
+   "km_hi": 130.1,
+   "km_length": 65.1,
+   "label": "Алматы–Талдыкорган · км 65–130"
+  },
+  "A3__KM_130_195": {
+   "latitude": 44.31468,
+   "longitude": 77.87692,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 130.1,
+   "km_hi": 195.2,
+   "km_length": 65.1,
+   "label": "Алматы–Талдыкорган · км 130–195"
+  },
+  "A3__KM_195_260": {
+   "latitude": 44.77364,
+   "longitude": 78.18694,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 195.2,
+   "km_hi": 260.3,
+   "km_length": 65.1,
+   "label": "Алматы–Талдыкорган · км 195–260"
+  },
+  "A350__KM_0_58": {
+   "latitude": 45.21724,
+   "longitude": 78.51221,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 58.2,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 0–58"
+  },
+  "A350__KM_58_116": {
+   "latitude": 45.40579,
+   "longitude": 79.10889,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 58.2,
+   "km_hi": 116.4,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 58–116"
+  },
+  "A350__KM_116_175": {
+   "latitude": 45.4261,
+   "longitude": 79.83187,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 116.4,
+   "km_hi": 174.6,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 116–175"
+  },
+  "A350__KM_175_233": {
+   "latitude": 45.7389,
+   "longitude": 80.29093,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 174.6,
+   "km_hi": 232.8,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 175–233"
+  },
+  "A350__KM_233_291": {
+   "latitude": 45.98061,
+   "longitude": 80.69664,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 232.8,
+   "km_hi": 291.0,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 233–291"
+  },
+  "A350__KM_291_349": {
+   "latitude": 46.43988,
+   "longitude": 80.68093,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 291.0,
+   "km_hi": 349.2,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 291–349"
+  },
+  "A350__KM_349_407": {
+   "latitude": 46.92569,
+   "longitude": 80.61679,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 349.2,
+   "km_hi": 407.4,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 349–407"
+  },
+  "A350__KM_407_466": {
+   "latitude": 47.40211,
+   "longitude": 80.58035,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 407.4,
+   "km_hi": 465.6,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 407–466"
+  },
+  "A350__KM_466_524": {
+   "latitude": 47.88051,
+   "longitude": 80.50714,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 465.6,
+   "km_hi": 523.7,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 466–524"
+  },
+  "A350__KM_524_582": {
+   "latitude": 48.3321,
+   "longitude": 80.43864,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 523.7,
+   "km_hi": 581.9,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 524–582"
+  },
+  "A350__KM_582_640": {
+   "latitude": 48.76157,
+   "longitude": 80.85105,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 581.9,
+   "km_hi": 640.1,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 582–640"
+  },
+  "A350__KM_640_698": {
+   "latitude": 49.18423,
+   "longitude": 81.19206,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 640.1,
+   "km_hi": 698.3,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 640–698"
+  },
+  "A350__KM_698_757": {
+   "latitude": 49.46261,
+   "longitude": 81.814,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 698.3,
+   "km_hi": 756.5,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 698–757"
+  },
+  "A350__KM_757_815": {
+   "latitude": 49.81835,
+   "longitude": 82.31742,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 756.5,
+   "km_hi": 814.7,
+   "km_length": 58.2,
+   "label": "Талдыкорган–Аягоз–Усть-Каменогорск · км 757–815"
+  },
+  "A351__KM_0_54": {
+   "latitude": 50.03873,
+   "longitude": 82.34403,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 53.8,
+   "km_length": 53.8,
+   "label": "Усть-Каменогорск–Семей · км 0–54"
+  },
+  "A351__KM_54_108": {
+   "latitude": 50.13368,
+   "longitude": 81.67728,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 53.8,
+   "km_hi": 107.6,
+   "km_length": 53.8,
+   "label": "Усть-Каменогорск–Семей · км 54–108"
+  },
+  "A351__KM_108_161": {
+   "latitude": 50.14133,
+   "longitude": 81.05745,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 107.6,
+   "km_hi": 161.4,
+   "km_length": 53.8,
+   "label": "Усть-Каменогорск–Семей · км 108–161"
+  },
+  "A351__KM_161_215": {
+   "latitude": 50.34687,
+   "longitude": 80.50739,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 161.4,
+   "km_hi": 215.3,
+   "km_length": 53.8,
+   "label": "Усть-Каменогорск–Семей · км 161–215"
+  },
+  "A17__KM_0_55": {
+   "latitude": 50.57987,
+   "longitude": 80.02321,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 55.3,
+   "km_length": 55.3,
+   "label": "Семей–Павлодар · км 0–55"
+  },
+  "A17__KM_55_111": {
+   "latitude": 50.89777,
+   "longitude": 79.45149,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 55.3,
+   "km_hi": 110.7,
+   "km_length": 55.3,
+   "label": "Семей–Павлодар · км 55–111"
+  },
+  "A17__KM_111_166": {
+   "latitude": 51.13546,
+   "longitude": 78.80607,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 110.7,
+   "km_hi": 166.0,
+   "km_length": 55.3,
+   "label": "Семей–Павлодар · км 111–166"
+  },
+  "A17__KM_166_221": {
+   "latitude": 51.4372,
+   "longitude": 78.17782,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 166.0,
+   "km_hi": 221.4,
+   "km_length": 55.3,
+   "label": "Семей–Павлодар · км 166–221"
+  },
+  "A17__KM_221_277": {
+   "latitude": 51.66769,
+   "longitude": 77.56609,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 221.4,
+   "km_hi": 276.7,
+   "km_length": 55.3,
+   "label": "Семей–Павлодар · км 221–277"
+  },
+  "A17__KM_277_332": {
+   "latitude": 52.07278,
+   "longitude": 77.1497,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 276.7,
+   "km_hi": 332.1,
+   "km_length": 55.3,
+   "label": "Семей–Павлодар · км 277–332"
+  },
+  "A17N__KM_0_58": {
+   "latitude": 52.20853,
+   "longitude": 76.67257,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 57.5,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 0–58"
+  },
+  "A17N__KM_58_115": {
+   "latitude": 51.93858,
+   "longitude": 75.9651,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 57.5,
+   "km_hi": 115.1,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 58–115"
+  },
+  "A17N__KM_115_173": {
+   "latitude": 51.74026,
+   "longitude": 75.32148,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 115.1,
+   "km_hi": 172.6,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 115–173"
+  },
+  "A17N__KM_173_230": {
+   "latitude": 51.71563,
+   "longitude": 74.70825,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 172.6,
+   "km_hi": 230.1,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 173–230"
+  },
+  "A17N__KM_230_288": {
+   "latitude": 51.69481,
+   "longitude": 73.88146,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 230.1,
+   "km_hi": 287.7,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 230–288"
+  },
+  "A17N__KM_288_345": {
+   "latitude": 51.70895,
+   "longitude": 73.05185,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 287.7,
+   "km_hi": 345.2,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 288–345"
+  },
+  "A17N__KM_345_403": {
+   "latitude": 51.71317,
+   "longitude": 72.26371,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 345.2,
+   "km_hi": 402.7,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 345–403"
+  },
+  "A17N__KM_403_460": {
+   "latitude": 51.35333,
+   "longitude": 71.69594,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 402.7,
+   "km_hi": 460.3,
+   "km_length": 57.5,
+   "label": "Павлодар–Экибастуз–Астана · км 403–460"
+  },
+  "M36__KM_0_54": {
+   "latitude": 51.07013,
+   "longitude": 71.78112,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 53.7,
+   "km_length": 53.7,
+   "label": "Астана–Караганда · км 0–54"
+  },
+  "M36__KM_54_107": {
+   "latitude": 50.72616,
+   "longitude": 72.3087,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 53.7,
+   "km_hi": 107.3,
+   "km_length": 53.7,
+   "label": "Астана–Караганда · км 54–107"
+  },
+  "M36__KM_107_161": {
+   "latitude": 50.36109,
+   "longitude": 72.73286,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 107.3,
+   "km_hi": 161.0,
+   "km_length": 53.7,
+   "label": "Астана–Караганда · км 107–161"
+  },
+  "M36__KM_161_215": {
+   "latitude": 50.00522,
+   "longitude": 72.98852,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 161.0,
+   "km_hi": 214.7,
+   "km_length": 53.7,
+   "label": "Астана–Караганда · км 161–215"
+  },
+  "M36S__KM_0_59": {
+   "latitude": 49.56392,
+   "longitude": 73.25549,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 59.4,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 0–59"
+  },
+  "M36S__KM_59_119": {
+   "latitude": 49.08282,
+   "longitude": 73.53051,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 59.4,
+   "km_hi": 118.8,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 59–119"
+  },
+  "M36S__KM_119_178": {
+   "latitude": 48.58077,
+   "longitude": 73.6967,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 118.8,
+   "km_hi": 178.2,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 119–178"
+  },
+  "M36S__KM_178_238": {
+   "latitude": 48.09367,
+   "longitude": 73.88399,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 178.2,
+   "km_hi": 237.6,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 178–238"
+  },
+  "M36S__KM_238_297": {
+   "latitude": 47.66494,
+   "longitude": 74.33484,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 237.6,
+   "km_hi": 297.0,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 238–297"
+  },
+  "M36S__KM_297_356": {
+   "latitude": 47.23552,
+   "longitude": 74.79069,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 297.0,
+   "km_hi": 356.4,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 297–356"
+  },
+  "M36S__KM_356_416": {
+   "latitude": 46.86263,
+   "longitude": 74.89561,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 356.4,
+   "km_hi": 415.8,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 356–416"
+  },
+  "M36S__KM_416_475": {
+   "latitude": 46.60032,
+   "longitude": 74.2886,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 415.8,
+   "km_hi": 475.2,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 416–475"
+  },
+  "M36S__KM_475_535": {
+   "latitude": 46.26678,
+   "longitude": 73.69591,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 475.2,
+   "km_hi": 534.6,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 475–535"
+  },
+  "M36S__KM_535_594": {
+   "latitude": 45.80576,
+   "longitude": 73.39287,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 534.6,
+   "km_hi": 594.0,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 535–594"
+  },
+  "M36S__KM_594_653": {
+   "latitude": 45.3559,
+   "longitude": 73.68106,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 594.0,
+   "km_hi": 653.4,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 594–653"
+  },
+  "M36S__KM_653_713": {
+   "latitude": 44.92647,
+   "longitude": 74.02405,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 653.4,
+   "km_hi": 712.8,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 653–713"
+  },
+  "M36S__KM_713_772": {
+   "latitude": 44.57496,
+   "longitude": 74.55844,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 712.8,
+   "km_hi": 772.2,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 713–772"
+  },
+  "M36S__KM_772_832": {
+   "latitude": 44.35768,
+   "longitude": 75.22945,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 772.2,
+   "km_hi": 831.6,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 772–832"
+  },
+  "M36S__KM_832_891": {
+   "latitude": 44.14053,
+   "longitude": 75.88444,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 831.6,
+   "km_hi": 891.0,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 832–891"
+  },
+  "M36S__KM_891_950": {
+   "latitude": 43.79305,
+   "longitude": 76.40651,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 891.0,
+   "km_hi": 950.4,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 891–950"
+  },
+  "M36S__KM_950_1010": {
+   "latitude": 43.43636,
+   "longitude": 76.84336,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 950.4,
+   "km_hi": 1009.8,
+   "km_length": 59.4,
+   "label": "Караганда–Балхаш–Алматы · км 950–1010"
+  },
+  "A17W__KM_0_60": {
+   "latitude": 49.66709,
+   "longitude": 72.86324,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 59.6,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 0–60"
+  },
+  "A17W__KM_60_119": {
+   "latitude": 49.22975,
+   "longitude": 72.87808,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 59.6,
+   "km_hi": 119.1,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 60–119"
+  },
+  "A17W__KM_119_179": {
+   "latitude": 48.88987,
+   "longitude": 72.32042,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 119.1,
+   "km_hi": 178.7,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 119–179"
+  },
+  "A17W__KM_179_238": {
+   "latitude": 48.69209,
+   "longitude": 71.60852,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 178.7,
+   "km_hi": 238.2,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 179–238"
+  },
+  "A17W__KM_238_298": {
+   "latitude": 48.57095,
+   "longitude": 70.83345,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 238.2,
+   "km_hi": 297.8,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 238–298"
+  },
+  "A17W__KM_298_357": {
+   "latitude": 48.45353,
+   "longitude": 70.0892,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 297.8,
+   "km_hi": 357.3,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 298–357"
+  },
+  "A17W__KM_357_417": {
+   "latitude": 48.25365,
+   "longitude": 69.38168,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 357.3,
+   "km_hi": 416.9,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 357–417"
+  },
+  "A17W__KM_417_476": {
+   "latitude": 48.10446,
+   "longitude": 68.63206,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 416.9,
+   "km_hi": 476.4,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 417–476"
+  },
+  "A17W__KM_476_536": {
+   "latitude": 47.85229,
+   "longitude": 67.94724,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 476.4,
+   "km_hi": 536.0,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 476–536"
+  },
+  "A17W__KM_536_596": {
+   "latitude": 47.51688,
+   "longitude": 67.85642,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 536.0,
+   "km_hi": 595.5,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 536–596"
+  },
+  "A17W__KM_596_655": {
+   "latitude": 47.0349,
+   "longitude": 67.79786,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 595.5,
+   "km_hi": 655.1,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 596–655"
+  },
+  "A17W__KM_655_715": {
+   "latitude": 46.556,
+   "longitude": 67.46483,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 655.1,
+   "km_hi": 714.7,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 655–715"
+  },
+  "A17W__KM_715_774": {
+   "latitude": 46.13649,
+   "longitude": 67.00487,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 714.7,
+   "km_hi": 774.2,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 715–774"
+  },
+  "A17W__KM_774_834": {
+   "latitude": 45.62991,
+   "longitude": 66.98184,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 774.2,
+   "km_hi": 833.8,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 774–834"
+  },
+  "A17W__KM_834_893": {
+   "latitude": 45.23954,
+   "longitude": 66.47185,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 833.8,
+   "km_hi": 893.3,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 834–893"
+  },
+  "A17W__KM_893_953": {
+   "latitude": 44.9506,
+   "longitude": 65.83705,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 893.3,
+   "km_hi": 952.9,
+   "km_length": 59.6,
+   "label": "Караганда–Жезказган–Кызылорда · км 893–953"
+  },
+  "A1__KM_0_62": {
+   "latitude": 51.39478,
+   "longitude": 71.31215,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 61.5,
+   "km_length": 61.5,
+   "label": "Астана–Кокшетау · км 0–62"
+  },
+  "A1__KM_62_123": {
+   "latitude": 51.88353,
+   "longitude": 71.00664,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 61.5,
+   "km_hi": 123.0,
+   "km_length": 61.5,
+   "label": "Астана–Кокшетау · км 62–123"
+  },
+  "A1__KM_123_185": {
+   "latitude": 52.37501,
+   "longitude": 70.71151,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 123.0,
+   "km_hi": 184.6,
+   "km_length": 61.5,
+   "label": "Астана–Кокшетау · км 123–185"
+  },
+  "A1__KM_185_246": {
+   "latitude": 52.77924,
+   "longitude": 70.25198,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 184.6,
+   "km_hi": 246.1,
+   "km_length": 61.5,
+   "label": "Астана–Кокшетау · км 185–246"
+  },
+  "A1__KM_246_308": {
+   "latitude": 53.1583,
+   "longitude": 69.77662,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 246.1,
+   "km_hi": 307.6,
+   "km_length": 61.5,
+   "label": "Астана–Кокшетау · км 246–308"
+  },
+  "M51__KM_0_63": {
+   "latitude": 53.55114,
+   "longitude": 69.49297,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 63.0,
+   "km_length": 63.0,
+   "label": "Кокшетау–Петропавловск · км 0–63"
+  },
+  "M51__KM_63_126": {
+   "latitude": 54.07434,
+   "longitude": 69.15944,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 63.0,
+   "km_hi": 126.1,
+   "km_length": 63.0,
+   "label": "Кокшетау–Петропавловск · км 63–126"
+  },
+  "M51__KM_126_189": {
+   "latitude": 54.62523,
+   "longitude": 69.14911,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 126.1,
+   "km_hi": 189.1,
+   "km_length": 63.0,
+   "label": "Кокшетау–Петропавловск · км 126–189"
+  },
+  "A22__KM_0_63": {
+   "latitude": 53.05957,
+   "longitude": 69.13787,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 62.9,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 0–63"
+  },
+  "A22__KM_63_126": {
+   "latitude": 52.58797,
+   "longitude": 68.82148,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 62.9,
+   "km_hi": 125.9,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 63–126"
+  },
+  "A22__KM_126_189": {
+   "latitude": 52.07314,
+   "longitude": 68.52621,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 125.9,
+   "km_hi": 188.8,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 126–189"
+  },
+  "A22__KM_189_252": {
+   "latitude": 51.79691,
+   "longitude": 67.97363,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 188.8,
+   "km_hi": 251.8,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 189–252"
+  },
+  "A22__KM_252_315": {
+   "latitude": 51.90577,
+   "longitude": 67.18176,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 251.8,
+   "km_hi": 314.7,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 252–315"
+  },
+  "A22__KM_315_378": {
+   "latitude": 51.90916,
+   "longitude": 66.3341,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 314.7,
+   "km_hi": 377.6,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 315–378"
+  },
+  "A22__KM_378_441": {
+   "latitude": 52.11697,
+   "longitude": 65.69532,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 377.6,
+   "km_hi": 440.6,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 378–441"
+  },
+  "A22__KM_441_504": {
+   "latitude": 52.26821,
+   "longitude": 64.80891,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 440.6,
+   "km_hi": 503.5,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 441–504"
+  },
+  "A22__KM_504_566": {
+   "latitude": 52.45091,
+   "longitude": 64.0846,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 503.5,
+   "km_hi": 566.4,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 504–566"
+  },
+  "A22__KM_566_629": {
+   "latitude": 52.97137,
+   "longitude": 63.77656,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 566.4,
+   "km_hi": 629.4,
+   "km_length": 62.9,
+   "label": "Кокшетау–Костанай · км 566–629"
+  },
+  "A1W__KM_0_59": {
+   "latitude": 51.26719,
+   "longitude": 71.08321,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 58.6,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 0–59"
+  },
+  "A1W__KM_59_117": {
+   "latitude": 51.31328,
+   "longitude": 70.28395,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 58.6,
+   "km_hi": 117.3,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 59–117"
+  },
+  "A1W__KM_117_176": {
+   "latitude": 51.63644,
+   "longitude": 69.84338,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 117.3,
+   "km_hi": 175.9,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 117–176"
+  },
+  "A1W__KM_176_235": {
+   "latitude": 51.79719,
+   "longitude": 69.10343,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 175.9,
+   "km_hi": 234.6,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 176–235"
+  },
+  "A1W__KM_235_293": {
+   "latitude": 51.79801,
+   "longitude": 68.3641,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 234.6,
+   "km_hi": 293.2,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 235–293"
+  },
+  "A1W__KM_293_352": {
+   "latitude": 51.84806,
+   "longitude": 67.6446,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 293.2,
+   "km_hi": 351.8,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 293–352"
+  },
+  "A1W__KM_352_410": {
+   "latitude": 51.89286,
+   "longitude": 66.84927,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 351.8,
+   "km_hi": 410.5,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 352–410"
+  },
+  "A1W__KM_410_469": {
+   "latitude": 51.96722,
+   "longitude": 66.21424,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 410.5,
+   "km_hi": 469.1,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 410–469"
+  },
+  "A1W__KM_469_528": {
+   "latitude": 52.15728,
+   "longitude": 65.48557,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 469.1,
+   "km_hi": 527.8,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 469–528"
+  },
+  "A1W__KM_528_586": {
+   "latitude": 52.29124,
+   "longitude": 64.65696,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 527.8,
+   "km_hi": 586.4,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 528–586"
+  },
+  "A1W__KM_586_645": {
+   "latitude": 52.5062,
+   "longitude": 64.06366,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 586.4,
+   "km_hi": 645.0,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 586–645"
+  },
+  "A1W__KM_645_704": {
+   "latitude": 52.98983,
+   "longitude": 63.76707,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 645.0,
+   "km_hi": 703.7,
+   "km_length": 58.6,
+   "label": "Астана–Атбасар–Костанай · км 645–704"
+  },
+  "A21__KM_0_60": {
+   "latitude": 53.02321,
+   "longitude": 63.3356,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 59.6,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 0–60"
+  },
+  "A21__KM_60_119": {
+   "latitude": 52.72202,
+   "longitude": 62.65091,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 59.6,
+   "km_hi": 119.1,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 60–119"
+  },
+  "A21__KM_119_179": {
+   "latitude": 52.49625,
+   "longitude": 61.94714,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 119.1,
+   "km_hi": 178.7,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 119–179"
+  },
+  "A21__KM_179_238": {
+   "latitude": 52.12189,
+   "longitude": 61.98953,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 178.7,
+   "km_hi": 238.3,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 179–238"
+  },
+  "A21__KM_238_298": {
+   "latitude": 51.62007,
+   "longitude": 61.84856,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 238.3,
+   "km_hi": 297.9,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 238–298"
+  },
+  "A21__KM_298_357": {
+   "latitude": 51.17328,
+   "longitude": 61.71636,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 297.9,
+   "km_hi": 357.4,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 298–357"
+  },
+  "A21__KM_357_417": {
+   "latitude": 50.75107,
+   "longitude": 61.36995,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 357.4,
+   "km_hi": 417.0,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 357–417"
+  },
+  "A21__KM_417_477": {
+   "latitude": 50.4543,
+   "longitude": 60.74381,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 417.0,
+   "km_hi": 476.6,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 417–477"
+  },
+  "A21__KM_477_536": {
+   "latitude": 50.33347,
+   "longitude": 60.13664,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 476.6,
+   "km_hi": 536.1,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 477–536"
+  },
+  "A21__KM_536_596": {
+   "latitude": 50.00303,
+   "longitude": 59.88393,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 536.1,
+   "km_hi": 595.7,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 536–596"
+  },
+  "A21__KM_596_655": {
+   "latitude": 50.12574,
+   "longitude": 59.07869,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 595.7,
+   "km_hi": 655.3,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 596–655"
+  },
+  "A21__KM_655_715": {
+   "latitude": 50.25097,
+   "longitude": 58.35896,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 655.3,
+   "km_hi": 714.8,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 655–715"
+  },
+  "A21__KM_715_774": {
+   "latitude": 50.29388,
+   "longitude": 57.56049,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 714.8,
+   "km_hi": 774.4,
+   "km_length": 59.6,
+   "label": "Костанай–Актобе · км 715–774"
+  },
+  "M38__KM_0_59": {
+   "latitude": 52.51952,
+   "longitude": 76.82224,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 58.8,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 0–59"
+  },
+  "M38__KM_59_118": {
+   "latitude": 52.974,
+   "longitude": 76.41623,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 58.8,
+   "km_hi": 117.6,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 59–118"
+  },
+  "M38__KM_118_176": {
+   "latitude": 53.24242,
+   "longitude": 75.68301,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 117.6,
+   "km_hi": 176.4,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 118–176"
+  },
+  "M38__KM_176_235": {
+   "latitude": 53.65269,
+   "longitude": 75.14984,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 176.4,
+   "km_hi": 235.2,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 176–235"
+  },
+  "M38__KM_235_294": {
+   "latitude": 54.12151,
+   "longitude": 74.89365,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 235.2,
+   "km_hi": 294.0,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 235–294"
+  },
+  "M38__KM_294_353": {
+   "latitude": 54.50415,
+   "longitude": 74.36235,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 294.0,
+   "km_hi": 352.8,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 294–353"
+  },
+  "M38__KM_353_412": {
+   "latitude": 54.75348,
+   "longitude": 73.61825,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 352.8,
+   "km_hi": 411.6,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 353–412"
+  },
+  "M38__KM_412_470": {
+   "latitude": 54.95158,
+   "longitude": 73.09565,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 411.6,
+   "km_hi": 470.4,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 412–470"
+  },
+  "M38__KM_470_529": {
+   "latitude": 54.97461,
+   "longitude": 72.19877,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 470.4,
+   "km_hi": 529.2,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 470–529"
+  },
+  "M38__KM_529_588": {
+   "latitude": 54.95654,
+   "longitude": 71.2908,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 529.2,
+   "km_hi": 588.0,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 529–588"
+  },
+  "M38__KM_588_647": {
+   "latitude": 54.91869,
+   "longitude": 70.40961,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 588.0,
+   "km_hi": 646.8,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 588–647"
+  },
+  "M38__KM_647_706": {
+   "latitude": 54.91364,
+   "longitude": 69.49056,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 646.8,
+   "km_hi": 705.7,
+   "km_length": 58.8,
+   "label": "Павлодар–Омск–Петропавловск · км 647–706"
+  }
+ }
+}

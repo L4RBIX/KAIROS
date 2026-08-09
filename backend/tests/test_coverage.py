@@ -41,8 +41,26 @@ def test_almaty_shymkent_hits_trained_corridor():
     ids = {m["segment_id"] for m in cov["matches"]}
     assert any(i.startswith("ALMATY_TASHKENT") for i in ids)
     for m in cov["matches"]:
-        assert m["coverage_type"] == "trained_approximate"
+        expected = "trained_approximate" if m["trained"] else "demo_corridor"
+        assert m["coverage_type"] == expected
         assert "risk" not in m  # coverage layer must not invent scores
+
+
+def test_trained_matches_rank_above_demo_corridors():
+    rt = load_runtime()
+    coords = [
+        [76.85, 43.22],
+        [74.63, 43.36],
+        [74.70, 43.05],
+        [70.77, 42.62],
+        [69.59, 42.30],
+    ]
+    matches = analyze_route_coverage(coords, rt.segments)["matches"]
+    trained_flags = [m["trained"] for m in matches]
+    assert True in trained_flags
+    # Journey scoring takes matches[:3]; surveyed geometry must not be crowded
+    # out by the denser demo corridor mesh.
+    assert trained_flags == sorted(trained_flags, reverse=True)
 
 
 def test_haversine_symmetry():

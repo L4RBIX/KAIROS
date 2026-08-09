@@ -253,8 +253,6 @@ export class JourneyMap {
         this.analysis = null;
         this.route = null;
         /** @type {ReturnType<typeof setTimeout>|null} */
-        this._enterTimer = null;
-        /** @type {ReturnType<typeof setTimeout>|null} */
         this._hideTimer = null;
 
         const style = document.createElement("style");
@@ -446,10 +444,6 @@ export class JourneyMap {
     hide() {
         this.active = false;
         this.root.classList.remove("active");
-        if (this._enterTimer) {
-            clearTimeout(this._enterTimer);
-            this._enterTimer = null;
-        }
         // After the opacity transition, drop visibility so MapLibre idles.
         if (this._hideTimer) clearTimeout(this._hideTimer);
         this._hideTimer = setTimeout(() => {
@@ -471,6 +465,7 @@ export class JourneyMap {
                 id: s.segment_id,
                 label: s.label,
                 note: s.coverage_note || "",
+                trained: s.trained !== false,
             },
             geometry: {
                 type: "Point",
@@ -491,9 +486,11 @@ export class JourneyMap {
             type: "circle",
             source: "coverage",
             paint: {
-                "circle-radius": 18,
+                // Surveyed segments carry the wider, brighter halo; the demo
+                // corridor network reads as a quieter connective mesh.
+                "circle-radius": ["case", ["get", "trained"], 18, 10],
                 "circle-color": "#8fc4e8",
-                "circle-opacity": 0.12,
+                "circle-opacity": ["case", ["get", "trained"], 0.12, 0.06],
             },
         });
         this.map.addLayer({
@@ -501,9 +498,10 @@ export class JourneyMap {
             type: "circle",
             source: "coverage",
             paint: {
-                "circle-radius": 5,
+                "circle-radius": ["case", ["get", "trained"], 5, 2.6],
                 "circle-color": "#8fc4e8",
-                "circle-stroke-width": 1,
+                "circle-opacity": ["case", ["get", "trained"], 1, 0.55],
+                "circle-stroke-width": ["case", ["get", "trained"], 1, 0],
                 "circle-stroke-color": "#e8f0f8",
             },
         });
@@ -598,7 +596,7 @@ export class JourneyMap {
                     : "No trained coverage on this route",
             );
 
-            // Auto Route Intelligence summary
+            // Route Intelligence summary — stay on the map; 3D only via Enter road view.
             this._setStatus("Composing route intelligence");
             try {
                 const intel = await journeyIntelligence({ action: "summarize", locale: "en" });
@@ -608,14 +606,8 @@ export class JourneyMap {
                     "Route analysis ready. AI briefing temporarily unavailable.";
             }
 
-            // Premium handoff: brief map settle, then return to the cinematic road.
             if (highest) {
-                this._setStatus("Entering road conditions");
-                if (this._enterTimer) clearTimeout(this._enterTimer);
-                this._enterTimer = setTimeout(() => {
-                    this._enterTimer = null;
-                    this.explore();
-                }, 1100);
+                this._setStatus("Analysis ready · Enter road view for 3D conditions");
             } else {
                 this._setStatus(
                     "No trained corridor on this route · stay for weather-only notes, or pick another journey",

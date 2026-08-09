@@ -215,7 +215,10 @@ async function boot() {
     // seven segments otherwise so Analyse never depends on a network round-trip
     // just to populate the dropdown.
     loadSegments().then((segments) => {
-        if (segments?.length) shell.setSegments(segments);
+        // The catalog also carries demo corridor midpoints for the nationwide
+        // planner; the manual dropdown stays on surveyed trained segments.
+        const trained = (segments || []).filter((s) => s.trained !== false);
+        if (trained.length) shell.setSegments(trained);
     });
     // Choreographs the camera, the storm and the interface together. It is the
     // only place the timing of the analyse sequence is written down.

@@ -125,6 +125,7 @@ def build_journey_summary(
                     "segment_id": m["segment_id"],
                     "label": m["label"],
                     "coverage_type": m["coverage_type"],
+                    "trained": m["trained"],
                     "approx_covered_km": m["approx_covered_km"],
                 }
                 for m in coverage.get("matches", [])

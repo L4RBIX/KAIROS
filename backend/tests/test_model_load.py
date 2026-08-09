@@ -8,11 +8,12 @@ import pandas as pd
 from app.model_runtime import load_runtime
 
 
-def test_model_loads_with_44_features_and_7_segments():
+def test_model_loads_with_44_features_and_7_trained_segments():
     rt = load_runtime()
     assert rt.feature_count == 44
     assert len(rt.features) == 44
-    assert rt.segment_count == 7
+    # Demo corridor midpoints may pad the catalog; the surveyed set stays at 7.
+    assert rt.trained_segment_count == 7
     assert 0 < rt.medium_threshold < rt.high_threshold < 1
     assert "CLOSE" in str(rt.meta.get("target", "")).upper() or "RESTRICT" in str(
         rt.meta.get("target", "")

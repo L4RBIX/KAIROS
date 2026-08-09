@@ -43,6 +43,18 @@ SEGMENT_LABELS: dict[str, str] = {
     "KAZ06__KM_1474_1806": "KAZ-06 · км 1474–1806",
 }
 
+# Demo coverage: synthetic corridor midpoints so every city pair resolves to a
+# route. Real weather + real LightGBM, but these are NOT surveyed training
+# segments — see demo_segments.py. Set KAIROS_DEMO_COVERAGE=0 to ship only the
+# seven trained segments.
+DEMO_COVERAGE = os.environ.get("KAIROS_DEMO_COVERAGE", "1").strip().lower() not in {
+    "0",
+    "false",
+    "no",
+    "off",
+}
+DEMO_SPACING_KM = float(os.environ.get("KAIROS_DEMO_SPACING_KM", "60"))
+
 # Departure scrubber window used by the product UI.
 CURVE_HOUR_START = 10
 CURVE_HOUR_END = 20

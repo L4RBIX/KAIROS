@@ -12,9 +12,12 @@ import lightgbm as lgb
 import numpy as np
 import pandas as pd
 
-from .config import MODEL_DIR, SEGMENT_LABELS
+from .config import DEMO_COVERAGE, DEMO_SPACING_KM, MODEL_DIR, SEGMENT_LABELS
+from .demo_segments import build_demo_segments
 
 log = logging.getLogger("kairos.model")
+
+TRAINED_SEGMENT_COUNT = 7
 
 
 @dataclass(frozen=True)
@@ -27,6 +30,9 @@ class Segment:
     km_hi: float
     km_length: float
     label: str
+    # False for demo corridor midpoints (see demo_segments.py). Trained segments
+    # always outrank these when a journey picks what to score.
+    trained: bool = True
 
 
 @dataclass
@@ -45,6 +51,14 @@ class ModelRuntime:
     @property
     def segment_count(self) -> int:
         return len(self.segments)
+
+    @property
+    def trained_segments(self) -> dict[str, Segment]:
+        return {sid: s for sid, s in self.segments.items() if s.trained}
+
+    @property
+    def trained_segment_count(self) -> int:
+        return sum(1 for s in self.segments.values() if s.trained)
 
     def risk_label(self, score: float) -> str:
         if score >= self.high_threshold:
@@ -125,8 +139,28 @@ def load_runtime(model_dir: Path | None = None) -> ModelRuntime:
             label=label,
         )
 
-    if len(segments) != 7:
-        raise ValueError(f"expected 7 trained segments, got {len(segments)}")
+    if len(segments) != TRAINED_SEGMENT_COUNT:
+        raise ValueError(
+            f"expected {TRAINED_SEGMENT_COUNT} trained segments, got {len(segments)}"
+        )
+
+    demo_count = 0
+    if DEMO_COVERAGE:
+        for sid, info in build_demo_segments(DEMO_SPACING_KM).items():
+            if sid in segments:
+                continue
+            segments[sid] = Segment(
+                segment_id=sid,
+                latitude=float(info["latitude"]),
+                longitude=float(info["longitude"]),
+                timezone=str(info["timezone"]),
+                km_lo=float(info["km_lo"]),
+                km_hi=float(info["km_hi"]),
+                km_length=float(info["km_length"]),
+                label=str(info["label"]),
+                trained=False,
+            )
+            demo_count += 1
 
     booster = lgb.Booster(model_file=str(model_path))
     medium = float(meta["medium_risk_threshold"])
@@ -143,10 +177,12 @@ def load_runtime(model_dir: Path | None = None) -> ModelRuntime:
     _RUNTIME = runtime
 
     log.info(
-        "model loaded type=%s features=%d segments=%d target=%r medium=%.6f high=%.6f",
+        "model loaded type=%s features=%d trained_segments=%d demo_corridors=%d "
+        "target=%r medium=%.6f high=%.6f",
         meta.get("model_type"),
         runtime.feature_count,
-        runtime.segment_count,
+        runtime.trained_segment_count,
+        demo_count,
         meta.get("target"),
         medium,
         high,

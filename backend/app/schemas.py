@@ -88,6 +88,7 @@ class SegmentOut(BaseModel):
     longitude: float = 0.0
     km_length: float = 0.0
     geo_method: str = "midpoint"
+    trained: bool = True
     coverage_note: str = "Representative midpoint — not a surveyed polyline."
 
 
@@ -155,6 +156,8 @@ class HealthResponse(BaseModel):
     model_type: str
     feature_count: int
     segment_count: int
+    trained_segment_count: int = 0
+    demo_coverage: bool = False
     target: Optional[str] = None
     medium_risk_threshold: Optional[float] = None
     high_risk_threshold: Optional[float] = None

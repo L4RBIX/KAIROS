@@ -135,5 +135,5 @@ def test_segments_include_coordinates(client):
     r = client.get("/api/segments")
     assert r.status_code == 200
     body = r.json()
-    assert len(body) == 7
+    assert len([s for s in body if s["trained"]]) == 7
     assert all("latitude" in s and "longitude" in s for s in body)

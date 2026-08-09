@@ -69,12 +69,30 @@ def analyze_route_coverage(
     matches: list[dict[str, Any]] = []
     covered_sum = 0.0
 
+    # Bounding box of the route, so a national segment catalog does not cost a
+    # full haversine sweep per segment.
+    lats = [lat for _, lat in coords]
+    lons = [lon for lon, _ in coords]
+    lat_min, lat_max = min(lats), max(lats)
+    lon_min, lon_max = min(lons), max(lons)
+
     for sid, seg in segments.items():
         radius = coverage_radius_km(seg)
-        min_d = min(
-            haversine_km(seg.latitude, seg.longitude, lat, lon)
-            for lon, lat in coords
+        lat_pad = radius / 111.0
+        lon_pad = radius / max(
+            1.0, 111.0 * math.cos(math.radians(max(-89.0, min(89.0, seg.latitude))))
         )
+        if not (lat_min - lat_pad <= seg.latitude <= lat_max + lat_pad):
+            continue
+        if not (lon_min - lon_pad <= seg.longitude <= lon_max + lon_pad):
+            continue
+
+        min_d = float("inf")
+        min_i = 0
+        for i, (lon, lat) in enumerate(coords):
+            d = haversine_km(seg.latitude, seg.longitude, lat, lon)
+            if d < min_d:
+                min_d, min_i = d, i
         if min_d > radius:
             continue
 
@@ -86,7 +104,11 @@ def analyze_route_coverage(
             {
                 "segment_id": sid,
                 "label": seg.label,
-                "coverage_type": "trained_approximate",
+                "trained": bool(seg.trained),
+                "coverage_type": "trained_approximate" if seg.trained else "demo_corridor",
+                # 0 at the origin, 1 at the destination — lets the caller spread
+                # a limited number of model calls along the whole journey.
+                "route_position": round(min_i / max(1, len(coords) - 1), 4),
                 "distance_to_midpoint_km": round(min_d, 2),
                 "coverage_radius_km": round(radius, 2),
                 "approx_covered_km": round(approx_km, 1),
@@ -103,15 +125,17 @@ def analyze_route_coverage(
     percent = max(0.0, min(100.0, percent))
 
     quality = "none"
-    note = "No trained KAIROS corridors intersect this route under conservative matching."
+    note = "No KAIROS corridors intersect this route under conservative matching."
     if matches:
         quality = "approximate"
         note = (
             "Coverage uses representative segment midpoints (not surveyed polylines). "
-            "Only these trained corridors can receive LightGBM risk."
+            "Only matched corridors receive LightGBM risk."
         )
 
-    matches.sort(key=lambda m: m["distance_to_midpoint_km"])
+    # Surveyed training segments always rank ahead of demo corridor midpoints,
+    # so a route that touches real trained geometry scores on that geometry.
+    matches.sort(key=lambda m: (not m["trained"], m["distance_to_midpoint_km"]))
     return {
         "total_km": round(length, 1),
         "covered_km": round(covered_sum, 1),

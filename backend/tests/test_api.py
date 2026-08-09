@@ -48,15 +48,24 @@ def test_health(client):
     body = r.json()
     assert body["model_loaded"] is True
     assert body["feature_count"] == 44
-    assert body["segment_count"] == 7
+    # Demo corridors may pad segment_count; the surveyed set stays at seven.
+    assert body["trained_segment_count"] == 7
+    assert body["segment_count"] >= 7
 
 
 def test_segments(client):
     r = client.get("/api/segments")
     assert r.status_code == 200
     body = r.json()
-    assert len(body) == 7
+    assert len([s for s in body if s["trained"]]) == 7
     assert all("segment_id" in s and "label" in s for s in body)
+
+
+def test_demo_segments_are_flagged_untrained(client):
+    body = client.get("/api/segments").json()
+    for s in body:
+        if not s["trained"]:
+            assert s["geo_method"] == "demo_corridor_midpoint"
 
 
 def test_unsupported_segment_rejected(client):

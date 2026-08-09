@@ -499,6 +499,110 @@ export const CSS = `
     transform: none;
 }
 
+.b-rp-controls {
+    display: grid;
+    gap: clamp(14px, 1.8vw, 20px);
+    max-width: 34em;
+    margin: 0 0 clamp(18px, 2.2vw, 28px);
+}
+.b-rp-field {
+    display: grid;
+    gap: 8px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--b-faint);
+}
+.b-rp-field b {
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: var(--b-accent);
+    font-variant-numeric: tabular-nums;
+}
+.b-rp-field select {
+    appearance: none;
+    width: 100%;
+    max-width: 34em;
+    padding: 10px 12px;
+    border: 0;
+    border-bottom: 1px solid var(--b-line);
+    border-radius: 0;
+    background: transparent;
+    color: var(--b-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    cursor: pointer;
+}
+.b-rp-field select:focus {
+    outline: none;
+    border-bottom-color: var(--b-frost);
+}
+.b-rp-time-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+.b-rp-play {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--b-dim);
+    font: inherit;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.b-rp-play:hover { color: var(--b-accent); }
+#b-rp-scrub {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 18px;
+    margin: 4px 0 0;
+    background: transparent;
+    cursor: pointer;
+}
+#b-rp-scrub::-webkit-slider-runnable-track {
+    height: 1px;
+    background: var(--b-line);
+}
+#b-rp-scrub::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px;
+    height: 11px;
+    margin-top: -5px;
+    border-radius: 50%;
+    border: 1px solid var(--b-frost);
+    background: var(--b-ink);
+}
+#b-rp-scrub::-moz-range-track {
+    height: 1px;
+    background: var(--b-line);
+    border: 0;
+}
+#b-rp-scrub::-moz-range-thumb {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 1px solid var(--b-frost);
+    background: var(--b-ink);
+}
+.b-rp-scrub-ends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--b-faint);
+    font-variant-numeric: tabular-nums;
+}
+
 .b-rp-head {
     display: flex;
     align-items: baseline;
