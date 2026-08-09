@@ -17,6 +17,7 @@ import {
     thresholdCrossing,
     durationLabel,
     scenarioById,
+    resolveScenario,
 } from "../app/demoData.js";
 import { weatherFromRisk } from "../app/weatherState.js";
 
@@ -36,7 +37,8 @@ export class Replay {
         this.weather = deps.weather;
         this.camera = deps.camera;
 
-        this.scenario = WINTER_SCENARIOS[0];
+        // Session-stable onset: random per scenario id, sticky in this tab.
+        this.scenario = resolveScenario(WINTER_SCENARIOS[0]);
         this._bindScenario(this.scenario);
 
         this.active = false;
@@ -52,7 +54,7 @@ export class Replay {
 
         this.shell.populateWinterScenarios?.(WINTER_SCENARIOS);
         this.el.datePick?.addEventListener("change", () => {
-            const next = scenarioById(this.el.datePick.value);
+            const next = resolveScenario(scenarioById(this.el.datePick.value));
             this.setScenario(next, { restartClock: true });
         });
         this.el.scrub?.addEventListener("input", () => {
@@ -83,7 +85,7 @@ export class Replay {
      * @param {{ restartClock?: boolean }} [opts]
      */
     setScenario(scenario, opts = {}) {
-        this._bindScenario(scenario);
+        this._bindScenario(resolveScenario(scenario));
         if (!this.active) return;
 
         if (opts.restartClock) this.hour = this.startHour;
@@ -107,6 +109,8 @@ export class Replay {
     }
 
     start() {
+        // Re-resolve so a prior session pick is reused; never re-roll mid-window.
+        this._bindScenario(resolveScenario(this.scenario.id));
         this.active = true;
         this.playing = true;
         this.hour = this.startHour;
