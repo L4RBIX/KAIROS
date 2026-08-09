@@ -89,6 +89,33 @@ journey planner, and product shell.
 
 ---
 
+## Production
+
+| | |
+| --- | --- |
+| **Frontend** | https://kairos-kz.vercel.app |
+| **Backend** | https://kairos-api-production-38f4.up.railway.app |
+| **Health** | https://kairos-api-production-38f4.up.railway.app/health |
+
+```
+Vercel (kairos-kz)
+        │  VITE_ML_API_URL
+        ▼
+Railway FastAPI (LightGBM + Open-Meteo)
+        │
+        ├── Open-Meteo (live weather features)
+        ├── BORAN LightGBM (7 corridors)
+        └── DeepSeek (Copilot / Route Intelligence — server-side only)
+```
+
+Required production env (names only):
+
+**Vercel:** `VITE_ML_API_URL`  
+**Railway:** `KAIROS_CORS_ORIGINS`, `DEEPSEEK_API_KEY`, `DEEPSEEK_BASE_URL`,
+`DEEPSEEK_MODEL`, `DEEPSEEK_TIMEOUT`, `DEEPSEEK_MAX_TOKENS`
+
+Never put DeepSeek keys in `VITE_*` variables.
+
 ## Quick start
 
 ### Frontend

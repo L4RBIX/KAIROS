@@ -1,0 +1,12 @@
+node_modules
+.venv
+backend/.venv
+backend/__pycache__
+backend/.pytest_cache
+.snapshots
+.git
+dist
+*.log
+.DS_Store
+agent-transcripts
+.cursor
