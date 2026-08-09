@@ -520,8 +520,17 @@ export const CSS = `
     color: var(--b-accent);
     font-variant-numeric: tabular-nums;
 }
-.b-rp-field select {
+.b-rp-datetime {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(12px, 2vw, 20px);
+    max-width: 34em;
+}
+.b-rp-field select,
+.b-rp-field input[type="date"],
+.b-rp-field input[type="time"] {
     appearance: none;
+    -webkit-appearance: none;
     width: 100%;
     max-width: 34em;
     padding: 10px 12px;
@@ -536,8 +545,11 @@ export const CSS = `
     letter-spacing: 0.01em;
     text-transform: none;
     cursor: pointer;
+    color-scheme: dark;
 }
-.b-rp-field select:focus {
+.b-rp-field select:focus,
+.b-rp-field input[type="date"]:focus,
+.b-rp-field input[type="time"]:focus {
     outline: none;
     border-bottom-color: var(--b-frost);
 }
@@ -1037,6 +1049,8 @@ export const CSS = `
 
 /* Mobile last — overrides desktop rules above. */
 @media (max-width: 620px) {
+    .b-rp-datetime { grid-template-columns: 1fr; }
+
     #boran {
         justify-content: flex-start;
         gap: 18px;

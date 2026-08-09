@@ -70,6 +70,7 @@ export class Shell {
             panel: root.querySelector("#b-replay"),
             date: root.querySelector("#b-rp-date"),
             datePick: root.querySelector("#b-rp-date-pick"),
+            timePick: root.querySelector("#b-rp-time-pick"),
             scrub: root.querySelector("#b-rp-scrub"),
             scrubEnds: root.querySelector("#b-rp-scrub-ends"),
             timeRead: root.querySelector("#b-rp-time-read"),
@@ -487,12 +488,11 @@ export class Shell {
     }
 }
 
-Shell.prototype.populateWinterScenarios = function (scenarios) {
+Shell.prototype.initWinterDateControl = function (dateISO) {
     const pick = this.replayEl.datePick;
-    if (!pick || !scenarios?.length) return;
-    pick.innerHTML = scenarios.map((s) =>
-        `<option value="${s.id}">${s.label} · ${s.route.from} → ${s.route.to}</option>`,
-    ).join("");
+    if (!pick) return;
+    if (dateISO) pick.value = dateISO;
+    else if (!pick.value) pick.value = "2024-01-14";
 };
 
 Shell.prototype.enterReplay = function (rec, markFraction) {
@@ -500,9 +500,9 @@ Shell.prototype.enterReplay = function (rec, markFraction) {
     this._productMode = "winter_demo";
     this.setView("replay");
     this.replayEl.date.textContent =
-        `Winter scenario · illustrative demo · ${rec.route.from} → ${rec.route.to}`;
-    if (this.replayEl.datePick && rec.id) {
-        this.replayEl.datePick.value = rec.id;
+        `Winter scenario · illustrative demo · ${rec.route.from} → ${rec.route.to} · ${rec.label}`;
+    if (this.replayEl.datePick && rec.date) {
+        this.replayEl.datePick.value = rec.date;
     }
     this.replayEl.verdict.classList.remove("b-shown");
     this.replayEl.verdict.innerHTML = "";
@@ -797,21 +797,27 @@ const MARKUP = `
     <div id="b-replay" class="b-replay" aria-live="polite">
         <div class="b-route" id="b-rp-date"></div>
         <div class="b-rp-controls">
-            <label class="b-rp-field" for="b-rp-date-pick">
-                <span>Scenario date</span>
-                <select id="b-rp-date-pick"></select>
-            </label>
+            <div class="b-rp-datetime">
+                <label class="b-rp-field" for="b-rp-date-pick">
+                    <span>Date</span>
+                    <input id="b-rp-date-pick" type="date" value="2024-01-14" />
+                </label>
+                <label class="b-rp-field" for="b-rp-time-pick">
+                    <span>Time</span>
+                    <input id="b-rp-time-pick" type="time" value="06:00" step="60" />
+                </label>
+            </div>
             <div class="b-rp-time">
                 <div class="b-rp-time-row">
                     <label class="b-rp-field" for="b-rp-scrub">
-                        <span>Time <b id="b-rp-time-read">06:00</b></span>
+                        <span>Scrub <b id="b-rp-time-read">00:00</b></span>
                     </label>
                     <button class="b-rp-play" id="b-rp-play" type="button">Pause</button>
                 </div>
-                <input id="b-rp-scrub" type="range" min="360" max="1180" value="360" step="1"
+                <input id="b-rp-scrub" type="range" min="0" max="1439" value="0" step="1"
                        aria-label="Scenario time" />
                 <div class="b-rp-scrub-ends" id="b-rp-scrub-ends">
-                    <span>06:00</span><span>19:40</span>
+                    <span>00:00</span><span>23:59</span>
                 </div>
             </div>
         </div>

@@ -101,6 +101,7 @@ export const ADVISORY_THRESHOLD = 0.70;
  * always mid-afternoon — morning onsets are common on the steppe.
  */
 const ONSET_POOL_H = [
+    4 + 40 / 60,  // 04:40
     6 + 20 / 60,  // 06:20
     7 + 10 / 60,  // 07:10
     8 + 5 / 60,   // 08:05
@@ -108,9 +109,29 @@ const ONSET_POOL_H = [
     11 + 15 / 60, // 11:15
     13 + 0 / 60,  // 13:00
     15 + 20 / 60, // 15:20
+    17 + 30 / 60, // 17:30
+    19 + 10 / 60, // 19:10
+];
+
+/** Full-day illustrative skeleton — risks are reshaped around the session onset. */
+const FULL_DAY_TEMPLATE = [
+    { time: "00:00", risk: 0.08 },
+    { time: "02:00", risk: 0.09 },
+    { time: "04:00", risk: 0.10 },
+    { time: "06:00", risk: 0.12 },
+    { time: "08:00", risk: 0.18 },
+    { time: "10:00", risk: 0.28 },
+    { time: "12:00", risk: 0.40 },
+    { time: "14:00", risk: 0.55 },
+    { time: "16:00", risk: 0.70 },
+    { time: "18:00", risk: 0.84 },
+    { time: "20:00", risk: 0.92 },
+    { time: "22:00", risk: 0.96 },
+    { time: "23:59", risk: 0.97, note: "Road closed" },
 ];
 
 const ONSET_SESSION_KEY = "kairos.winterStormOnset.v1";
+const DATE_SESSION_KEY = "kairos.winterScenarioDate.v1";
 
 /** @type {Map<string, number>} */
 const onsetMemory = new Map();
@@ -239,12 +260,84 @@ export function resolveScenario(scenarioOrId) {
     const base = typeof scenarioOrId === "string"
         ? scenarioById(scenarioOrId)
         : scenarioOrId;
+    if (base?.date && /^\d{4}-\d{2}-\d{2}$/.test(base.date) && base.id?.startsWith("day:")) {
+        return buildScenarioForDate(base.date);
+    }
     const start = hoursOf(base.samples[0].time);
     const end = hoursOf(base.samples[base.samples.length - 1].time);
     const onset = onsetForSession(base.id, start, end);
     return {
         ...base,
         samples: shapeSamplesAroundCrossing(base.samples, onset),
+        onsetClock: clockOf(onset),
+    };
+}
+
+/** @param {string} [fallback] */
+export function sessionScenarioDate(fallback = WINTER_SCENARIOS[0].date) {
+    try {
+        const v = sessionStorage.getItem(DATE_SESSION_KEY);
+        if (v && /^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+    } catch { /* */ }
+    return fallback;
+}
+
+/** @param {string} dateISO */
+export function rememberScenarioDate(dateISO) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateISO)) return;
+    try { sessionStorage.setItem(DATE_SESSION_KEY, dateISO); } catch { /* */ }
+}
+
+/** @param {string} dateISO */
+function formatDateLabel(dateISO) {
+    const d = new Date(`${dateISO}T12:00:00`);
+    if (Number.isNaN(d.getTime())) return dateISO;
+    return d.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+}
+
+/** @param {string} dateISO */
+function routeForDate(dateISO) {
+    let h = 0;
+    for (let i = 0; i < dateISO.length; i++) h = (h + dateISO.charCodeAt(i) * (i + 3)) % 997;
+    const preset = WINTER_SCENARIOS[h % WINTER_SCENARIOS.length];
+    return { from: preset.route.from, to: preset.route.to };
+}
+
+/**
+ * Free-date winter day: any calendar date, full 00:00–23:59 scrub window,
+ * session-sticky randomised storm onset.
+ * @param {string} dateISO YYYY-MM-DD
+ * @returns {WinterScenario & { onsetClock: string }}
+ */
+export function buildScenarioForDate(dateISO) {
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(dateISO)
+        ? dateISO
+        : WINTER_SCENARIOS[0].date;
+    rememberScenarioDate(date);
+    const id = `day:${date}`;
+    const onset = onsetForSession(id, 0, 23 + 59 / 60);
+    const samples = shapeSamplesAroundCrossing(FULL_DAY_TEMPLATE, onset);
+    // Closure shown when the curve is essentially whiteout / end of day.
+    let closedAt = samples[samples.length - 1].time;
+    for (const s of samples) {
+        if (s.risk >= 0.95) {
+            closedAt = s.time;
+            break;
+        }
+    }
+    const route = routeForDate(date);
+    return {
+        id,
+        label: formatDateLabel(date),
+        date,
+        route,
+        closedAt,
+        closureLabel: "Road closed by the regional authority",
+        samples,
         onsetClock: clockOf(onset),
     };
 }

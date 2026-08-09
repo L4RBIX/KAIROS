@@ -1,28 +1,32 @@
 /**
  * Winter scenario replay.
  *
- * Plays / scrubs an illustrative recorded day through the same weather director
- * the live prediction drives. Not a LightGBM score — demo narrative only.
+ * Plays / scrubs an illustrative day through the same weather director the live
+ * prediction drives. Not a LightGBM score — demo narrative only.
  *
- * Advances on the render loop when playing. Date + time can be changed by the
- * user without leaving the cinematic scene.
+ * Any calendar date and any clock time (00:00–23:59). Storm onset is randomised
+ * per date and sticky within the browser tab.
  */
 
 import {
-    WINTER_SCENARIOS,
     ADVISORY_THRESHOLD,
     hoursOf,
     clockOf,
     riskAtHour,
     thresholdCrossing,
     durationLabel,
-    scenarioById,
-    resolveScenario,
+    buildScenarioForDate,
+    sessionScenarioDate,
+    rememberScenarioDate,
+    WINTER_SCENARIOS,
 } from "../app/demoData.js";
 import { weatherFromRisk } from "../app/weatherState.js";
 
-/** Seconds of wall clock for a full autoplay pass of the recorded window. */
-const DURATION = 20;
+/** Seconds of wall clock for a full autoplay pass of the day. */
+const DURATION = 24;
+
+const DAY_START = 0;
+const DAY_END = 23 + 59 / 60;
 
 export class Replay {
     /**
@@ -37,8 +41,7 @@ export class Replay {
         this.weather = deps.weather;
         this.camera = deps.camera;
 
-        // Session-stable onset: random per scenario id, sticky in this tab.
-        this.scenario = resolveScenario(WINTER_SCENARIOS[0]);
+        this.scenario = buildScenarioForDate(sessionScenarioDate());
         this._bindScenario(this.scenario);
 
         this.active = false;
@@ -52,15 +55,27 @@ export class Replay {
         this.el.start.addEventListener("click", () => this.start());
         this.el.exit.addEventListener("click", () => this.stop());
 
-        this.shell.populateWinterScenarios?.(WINTER_SCENARIOS);
+        this.shell.initWinterDateControl?.(this.scenario.date);
         this.el.datePick?.addEventListener("change", () => {
-            const next = resolveScenario(scenarioById(this.el.datePick.value));
-            this.setScenario(next, { restartClock: true });
+            const date = this.el.datePick.value || sessionScenarioDate();
+            rememberScenarioDate(date);
+            this.setDate(date, { restartClock: true });
+        });
+        this.el.timePick?.addEventListener("change", () => {
+            if (!this.active) return;
+            const raw = this.el.timePick.value || "00:00";
+            this.seek(hoursOf(raw.length === 5 ? raw : raw.slice(0, 5)));
+            this.pause();
+        });
+        this.el.timePick?.addEventListener("input", () => {
+            if (!this.active) return;
+            const raw = this.el.timePick.value || "00:00";
+            this.seek(hoursOf(raw.length === 5 ? raw : raw.slice(0, 5)));
+            this.pause();
         });
         this.el.scrub?.addEventListener("input", () => {
             if (!this.active) return;
-            const mins = +this.el.scrub.value;
-            this.seek(mins / 60);
+            this.seek((+this.el.scrub.value) / 60);
             this.pause();
         });
         this.el.play?.addEventListener("click", () => {
@@ -73,27 +88,23 @@ export class Replay {
     /** @param {import("../app/demoData.js").WinterScenario} scenario */
     _bindScenario(scenario) {
         this.scenario = scenario;
-        const s = scenario.samples;
-        this.startHour = hoursOf(s[0].time);
-        this.endHour = hoursOf(s[s.length - 1].time);
-        this.crossing = thresholdCrossing(s);
+        this.startHour = DAY_START;
+        this.endHour = DAY_END;
+        this.crossing = thresholdCrossing(scenario.samples);
         this.leadTime = this.endHour - this.crossing;
     }
 
     /**
-     * @param {import("../app/demoData.js").WinterScenario} scenario
+     * @param {string} dateISO
      * @param {{ restartClock?: boolean }} [opts]
      */
-    setScenario(scenario, opts = {}) {
-        this._bindScenario(resolveScenario(scenario));
+    setDate(dateISO, opts = {}) {
+        this._bindScenario(buildScenarioForDate(dateISO));
         if (!this.active) return;
 
         if (opts.restartClock) this.hour = this.startHour;
         else {
-            this.hour = Math.min(
-                this.endHour,
-                Math.max(this.startHour, this.hour),
-            );
+            this.hour = Math.min(this.endHour, Math.max(this.startHour, this.hour));
         }
 
         this.shell.enterReplay(
@@ -104,17 +115,22 @@ export class Replay {
         const risk = riskAtHour(this.hour, this.scenario.samples);
         this.weather.setTarget(weatherFromRisk(risk));
         this._render(risk);
-        // Soft camera settle when switching days mid-scenario.
         this.camera.cut("risk", 2.6);
     }
 
+    /** @deprecated kept for any callers still switching presets */
+    setScenario(scenario, opts = {}) {
+        const date = scenario?.date || sessionScenarioDate();
+        this.setDate(date, opts);
+    }
+
     start() {
-        // Re-resolve so a prior session pick is reused; never re-roll mid-window.
-        this._bindScenario(resolveScenario(this.scenario.id));
+        const date = this.el.datePick?.value || sessionScenarioDate(WINTER_SCENARIOS[0].date);
+        this._bindScenario(buildScenarioForDate(date));
         this.active = true;
         this.playing = true;
         this.hour = this.startHour;
-        if (this.el.datePick) this.el.datePick.value = this.scenario.id;
+        if (this.el.datePick) this.el.datePick.value = this.scenario.date;
         this.shell.enterReplay(
             this.scenario,
             (this.crossing - this.startHour) / (this.endHour - this.startHour),
@@ -176,20 +192,25 @@ export class Replay {
     }
 
     _syncControls(opts = {}) {
-        if (!this.el.scrub) return;
-        const min = Math.round(this.startHour * 60);
-        const max = Math.round(this.endHour * 60);
-        if (+this.el.scrub.min !== min) this.el.scrub.min = String(min);
-        if (+this.el.scrub.max !== max) this.el.scrub.max = String(max);
-        if (!opts.fromSeek) {
-            this.el.scrub.value = String(Math.round(this.hour * 60));
+        const clock = clockOf(this.hour);
+        if (this.el.scrub) {
+            const min = 0;
+            const max = 23 * 60 + 59;
+            if (+this.el.scrub.min !== min) this.el.scrub.min = String(min);
+            if (+this.el.scrub.max !== max) this.el.scrub.max = String(max);
+            if (!opts.fromSeek) {
+                this.el.scrub.value = String(Math.round(this.hour * 60));
+            }
         }
-        if (this.el.timeRead) {
-            this.el.timeRead.textContent = clockOf(this.hour);
+        if (this.el.timeRead) this.el.timeRead.textContent = clock;
+        if (this.el.timePick && document.activeElement !== this.el.timePick) {
+            this.el.timePick.value = clock;
+        }
+        if (this.el.datePick && this.scenario.date) {
+            this.el.datePick.value = this.scenario.date;
         }
         if (this.el.scrubEnds) {
-            this.el.scrubEnds.innerHTML =
-                `<span>${clockOf(this.startHour)}</span><span>${clockOf(this.endHour)}</span>`;
+            this.el.scrubEnds.innerHTML = `<span>00:00</span><span>23:59</span>`;
         }
     }
 
@@ -199,7 +220,8 @@ export class Replay {
     }
 
     _render(risk) {
-        const done = this.hour >= this.endHour;
+        const closedHour = hoursOf(this.scenario.closedAt);
+        const done = this.hour >= closedHour || risk >= 0.95;
         const progress =
             (this.hour - this.startHour) / (this.endHour - this.startHour);
         this.shell.updateReplay({
@@ -211,7 +233,7 @@ export class Replay {
             closed: done,
             closedAt: this.scenario.closedAt,
             crossingClock: clockOf(this.crossing),
-            lead: durationLabel(this.leadTime),
+            lead: durationLabel(closedHour - this.crossing),
             threshold: ADVISORY_THRESHOLD,
         });
     }
