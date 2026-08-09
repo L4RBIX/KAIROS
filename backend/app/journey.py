@@ -1,4 +1,4 @@
-"""Journey analysis: coverage + LightGBM only on matched trained segments."""
+"""Journey analysis: coverage + LightGBM only on matched corridor segments."""
 
 from __future__ import annotations
 

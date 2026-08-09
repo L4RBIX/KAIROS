@@ -1,8 +1,9 @@
 /**
  * Kazakhstan journey map — route planning + model coverage layer.
  *
- * Separate from the WebGPU cinematic conditions view. Coverage markers use
- * representative midpoints from the trained catalog (not surveyed polylines).
+ * Separate from the WebGPU cinematic conditions view. Bright markers = the
+ * seven surveyed trained midpoints; the dimmer mesh = demo corridor midpoints
+ * (not surveyed training geometry).
  */
 
 import maplibregl from "maplibre-gl";
@@ -287,8 +288,8 @@ export class JourneyMap {
                     <button class="jm-go" id="jm-analyze" type="button">Analyze journey</button>
                     <p class="jm-status" id="jm-status"></p>
                     <div class="jm-legend">
-                        <div><b>●</b> ML risk available · trained corridor</div>
-                        <div><b>○</b> Weather-only · not yet trained</div>
+                        <div><b>●</b> Surveyed trained corridor</div>
+                        <div><b>·</b> Demo corridor network · not surveyed</div>
                     </div>
                     <div class="jm-result" id="jm-result">
                         <div class="jm-route" id="jm-route"></div>
@@ -296,7 +297,7 @@ export class JourneyMap {
                         <div class="jm-meta">
                             <div><span>Distance</span><b id="jm-dist">—</b></div>
                             <div><span>Model coverage</span><b id="jm-cov">—</b></div>
-                            <div><span>Trained sections</span><b id="jm-secs">—</b></div>
+                            <div><span>Matched sections</span><b id="jm-secs">—</b></div>
                             <div><span>Highest risk</span><b id="jm-risk">—</b></div>
                         </div>
                         <p class="jm-note" id="jm-note"></p>
@@ -548,7 +549,7 @@ export class JourneyMap {
 
         try {
             this.route = await routeDriving(from, to);
-            this._setStatus("Matching trained corridors");
+            this._setStatus("Matching corridor coverage");
             this.analysis = await analyzeJourney({
                 fromLabel: from.label,
                 toLabel: to.label,
@@ -579,7 +580,10 @@ export class JourneyMap {
                 : "Weather-only journey";
             this.el.dist.textContent = `${Math.round(this.route.distanceKm)} km`;
             this.el.cov.textContent = `${cov.percent ?? 0}%`;
-            this.el.secs.textContent = String(matches.length);
+            const surveyed = matches.filter((m) => m.trained).length;
+            this.el.secs.textContent = surveyed
+                ? `${matches.length} · ${surveyed} surveyed`
+                : String(matches.length);
             this.el.risk.textContent = highest
                 ? `${Math.round(highest.risk * 100)}% · ${highest.risk_label}`
                 : "—";
@@ -592,8 +596,8 @@ export class JourneyMap {
             this.el.explore.disabled = !highest;
             this._setStatus(
                 this.analysis.ml_available
-                    ? "Trained coverage detected"
-                    : "No trained coverage on this route",
+                    ? "Corridor coverage detected"
+                    : "No corridor coverage on this route",
             );
 
             // Route Intelligence summary — stay on the map; 3D only via Enter road view.
@@ -610,7 +614,7 @@ export class JourneyMap {
                 this._setStatus("Analysis ready · Enter road view for 3D conditions");
             } else {
                 this._setStatus(
-                    "No trained corridor on this route · stay for weather-only notes, or pick another journey",
+                    "No corridor coverage on this route · stay for weather-only notes, or pick another journey",
                     true,
                 );
             }
@@ -643,7 +647,7 @@ export class JourneyMap {
         }
         if ((action === "why" || action === "wait" || action === "safest") &&
             !this.analysis.ml_available) {
-            this._setStatus("Needs a trained corridor on this route", true);
+            this._setStatus("Needs corridor coverage on this route", true);
             return;
         }
         this._setStatus("Analyzing road conditions");

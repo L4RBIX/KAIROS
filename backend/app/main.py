@@ -197,6 +197,7 @@ async def journey_analyze(req: JourneyAnalyzeRequest) -> JourneyAnalyzeResponse:
             payload = {
                 **pred.model_dump(),
                 "segment_label": rt.segments[sid].label,
+                "trained": bool(rt.segments[sid].trained),
             }
             prediction_store.put_prediction(sid, payload)
             predictions.append(payload)
@@ -247,12 +248,13 @@ async def journey_intelligence(req: JourneyIntelligenceRequest) -> JourneyIntell
     prompts = {
         "summarize": (
             "Write a concise KAIROS Route Intelligence briefing for this journey. "
-            "Lead with coverage %, highest-risk trained section (if any), recommended departure, "
-            "and what is uncovered (weather-only). Do not invent scores."
+            "Lead with coverage %, highest-risk matched section (note surveyed vs demo), "
+            "recommended departure, and what is uncovered (weather-only). Do not invent scores."
         ),
         "why": (
-            "Explain WHY the highest-risk trained section has its current score, "
-            "using only supplied weather and risk curve facts. No SHAP; no invented causality."
+            "Explain WHY the highest-risk matched section has its current score, "
+            "using only supplied weather and risk curve facts. No SHAP; no invented causality. "
+            "If trained=false, say it is a demo corridor midpoint, not surveyed training geometry."
         ),
         "wait": (
             "Explain what changes if the driver waits about 2 hours, using wait_compare numbers only."
@@ -276,8 +278,9 @@ async def journey_intelligence(req: JourneyIntelligenceRequest) -> JourneyIntell
         "wait_compare": wait,
         "ml_available": stored.get("ml_available", False),
         "rules": [
-            "Only trained corridors have LightGBM risk.",
-            "Uncovered sections are weather-only / not yet trained.",
+            "LightGBM risk is scored on matched corridor midpoints (surveyed trained=true, or demo trained=false).",
+            "Do not call demo corridor midpoints surveyed training geometry.",
+            "Uncovered sections are weather-only.",
             "Risk scores are not calibrated probabilities.",
             "Do not invent closures, accidents, or scores.",
         ],
@@ -294,13 +297,14 @@ async def journey_intelligence(req: JourneyIntelligenceRequest) -> JourneyIntell
                 f"Journey {journey.get('from')} → {journey.get('to')} "
                 f"({journey.get('distance_km')} km). "
                 f"KAIROS ML coverage {cov_pct}% under conservative matching. "
-                "No trained corridor matched — weather monitoring only; no LightGBM risk invented."
+                "No corridor matched — weather monitoring only; no LightGBM risk invented."
             )
         else:
+            kind = "surveyed" if highest.get("trained") else "demo corridor"
             answer = (
                 f"Journey {journey.get('from')} → {journey.get('to')}. "
                 f"Model coverage ~{cov_pct}%. "
-                f"Main trained concern: {highest.get('segment_label') or highest.get('segment_id')} "
+                f"Highest-risk {kind}: {highest.get('segment_label') or highest.get('segment_id')} "
                 f"at {round((highest_risk or 0) * 100)}% ({highest.get('risk_label')}). "
                 f"Recommended departure: {highest.get('recommended_departure') or 'current window acceptable'}. "
                 "Uncovered sections remain weather-only."

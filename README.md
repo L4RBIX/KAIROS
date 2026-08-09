@@ -45,8 +45,8 @@ KAIROS is a decision product with a cinematic proof layer:
 This is the product hierarchy. Do not skip to the map.
 
 1. **Landing** — cinematic snowy highway. Brand. One line. **Plan journey**.
-2. **Map** — pick From / To (e.g. Almaty → Shymkent). Coverage markers = trained
-   midpoints only.
+2. **Map** — pick From / To (any of the 18 cities). Bright markers = the seven
+   surveyed trained midpoints; the dimmer mesh = the demo corridor network.
 3. **Analyze journey** — route + ML coverage. Then return to the 3D road.
 4. **Result** — risk %, band, best departure, live weather mets.
 5. **Scrubber** — move departure; storm intensity follows the risk curve
@@ -64,8 +64,11 @@ same weather director (not claimed as a labelled LightGBM event).
 - **The environment is the explanation.** Risk is not a badge over a static
   hero image. One weather director drives atmosphere, wind, blizzard, and how
   buried the carriageway is.
-- **Honest ML coverage.** Only seven trained corridors get LightGBM. Arbitrary
-  roads stay weather-only — labelled as such. No fake national model.
+- **Labelled ML coverage.** Only seven corridors are surveyed training geometry,
+  and the API says so per segment (`trained: true`). Demo builds add a corridor
+  network across the trunk roads so any city pair resolves; those midpoints are
+  flagged `trained: false` and never displace a real segment in scoring. Run
+  with `KAIROS_DEMO_COVERAGE=0` for the seven-segment-only build.
 - **One HTTP predict on Analyse.** Scrubber interpolates the cached curve.
 - **LLM never sets the score.** Copilot explains; LightGBM decides.
 - **Seasonal honesty.** If live winter hazard is inactive, visuals stay calm
@@ -194,11 +197,18 @@ backend/
 - **Target:** CLOSE or RESTRICT within the next 6 hours
 - **Output:** risk in `[0, 1]` — useful ranking score, **not** a calibrated
   probability for insurers
-- **Coverage:** seven republican corridor midpoints in `segments.json`
-- **Journey map:** OSRM geometry for any From/To; LightGBM only where the route
-  intersects trained buffers
+- **Trained coverage:** seven republican corridor midpoints in `segments.json`
+- **Demo coverage:** ~216 further midpoints laid along real OSRM road geometry
+  (`tools/build_demo_corridors.py` → `app/data/demo_corridors.json`) so every
+  city pair resolves to a corridor. Weather and LightGBM are genuine — the model
+  reads only latitude, longitude and km_length from a segment — but these are
+  **not** surveyed training geometry, and they carry `trained: false` end to end
+- **Journey map:** OSRM geometry for any From/To; surveyed segments are always
+  scored ahead of demo corridors, then the remaining model budget is spread
+  along the route
 
-That constraint is a feature. Judges can trust the labels.
+The labels are the contract: `/health` reports `trained_segment_count` and
+`demo_coverage`, and every segment and coverage match states which it is.
 
 ---
 

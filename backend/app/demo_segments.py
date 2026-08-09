@@ -96,10 +96,13 @@ CORRIDORS: list[tuple[str, str, list[tuple[float, float]]]] = [
     ("A21", "Костанай–Актобе", [
         (53.2144, 63.6246), (50.2839, 57.1670),
     ]),
-    # Pavlodar–Petropavl is driven through Omsk in practice; without this leg
-    # the pair routes entirely outside every domestic corridor.
+    # Northern legs whose driving route runs along/through the Russian border
+    # rather than any domestic corridor above.
     ("M38", "Павлодар–Омск–Петропавловск", [
         (52.2873, 76.9674), (54.9885, 73.3242), (54.8753, 69.1628),
+    ]),
+    ("A310", "Костанай–Петропавловск", [
+        (53.2144, 63.6246), (54.8753, 69.1628),
     ]),
 ]
 

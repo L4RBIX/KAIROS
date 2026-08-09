@@ -2,7 +2,7 @@
  "generated_by": "tools/build_demo_corridors.py",
  "spacing_km": 60.0,
  "router": "https://router.project-osrm.org",
- "corridors": 21,
+ "corridors": 22,
  "fallback_corridors": [],
  "segments": {
   "A2__KM_0_59": {
@@ -2084,6 +2084,86 @@
    "km_hi": 705.7,
    "km_length": 58.8,
    "label": "Павлодар–Омск–Петропавловск · км 647–706"
+  },
+  "A310__KM_0_56": {
+   "latitude": 53.33647,
+   "longitude": 63.92301,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 0.0,
+   "km_hi": 56.3,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 0–56"
+  },
+  "A310__KM_56_113": {
+   "latitude": 53.80466,
+   "longitude": 64.2326,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 56.3,
+   "km_hi": 112.5,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 56–113"
+  },
+  "A310__KM_113_169": {
+   "latitude": 53.98957,
+   "longitude": 65.01758,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 112.5,
+   "km_hi": 168.8,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 113–169"
+  },
+  "A310__KM_169_225": {
+   "latitude": 54.2843,
+   "longitude": 65.61226,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 168.8,
+   "km_hi": 225.0,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 169–225"
+  },
+  "A310__KM_225_281": {
+   "latitude": 54.51878,
+   "longitude": 66.35576,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 225.0,
+   "km_hi": 281.3,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 225–281"
+  },
+  "A310__KM_281_338": {
+   "latitude": 54.6616,
+   "longitude": 67.17821,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 281.3,
+   "km_hi": 337.5,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 281–338"
+  },
+  "A310__KM_338_394": {
+   "latitude": 54.80432,
+   "longitude": 67.97848,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 337.5,
+   "km_hi": 393.8,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 338–394"
+  },
+  "A310__KM_394_450": {
+   "latitude": 54.92011,
+   "longitude": 68.76693,
+   "timezone": "Asia/Almaty",
+   "geo_method": "demo_corridor_road_midpoint",
+   "km_lo": 393.8,
+   "km_hi": 450.0,
+   "km_length": 56.3,
+   "label": "Костанай–Петропавловск · км 394–450"
   }
  }
 }

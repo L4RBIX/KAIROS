@@ -9,7 +9,12 @@ the shipped LightGBM model and live Open-Meteo weather.
 - Target: **CLOSE or RESTRICT within next 6 hours**
 - Output: risk score in `[0, 1]` — **not** a calibrated probability
 - Features: exactly 44, order from `model/BORAN_MODEL/feature_order.json`
-- Coverage: only the seven segments in `segments.json`
+- Trained coverage: the seven segments in `segments.json` (`trained: true`)
+- Demo coverage: corridor midpoints from `app/data/demo_corridors.json`, added
+  so any city pair resolves to a route. Real weather, real LightGBM, but not
+  surveyed training geometry — flagged `trained: false` and ranked below the
+  seven everywhere. Set `KAIROS_DEMO_COVERAGE=0` to disable.
+  Regenerate with `python tools/build_demo_corridors.py` (needs network).
 
 ## Run locally
 

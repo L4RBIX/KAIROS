@@ -131,6 +131,30 @@ def test_journey_intelligence_without_deepseek(client, monkeypatch):
         assert 0 <= body["highest_risk"] <= 1
 
 
+def test_scored_segments_spread_along_route():
+    from app.main import _select_segments_to_score
+
+    matches = [
+        {"segment_id": f"D{i}", "trained": False, "route_position": i / 19}
+        for i in range(20)
+    ]
+    picked = _select_segments_to_score(matches, limit=3)
+    assert picked == ["D0", "D10", "D19"]
+
+
+def test_trained_segments_take_priority_over_demo():
+    from app.main import _select_segments_to_score
+
+    matches = [
+        {"segment_id": "TRAINED", "trained": True, "route_position": 0.5},
+        {"segment_id": "D0", "trained": False, "route_position": 0.0},
+        {"segment_id": "D1", "trained": False, "route_position": 1.0},
+    ]
+    picked = _select_segments_to_score(matches, limit=3)
+    assert picked[0] == "TRAINED"
+    assert set(picked) == {"TRAINED", "D0", "D1"}
+
+
 def test_segments_include_coordinates(client):
     r = client.get("/api/segments")
     assert r.status_code == 200

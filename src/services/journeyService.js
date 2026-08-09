@@ -27,6 +27,30 @@ async function api(path, init) {
     }
 }
 
+/** The analyse endpoint rejects geometry longer than this. */
+const MAX_GEOMETRY_POINTS = 5000;
+
+/**
+ * Thin a route to at most `max` points, always keeping both endpoints.
+ *
+ * OSRM returns one vertex per road node, so anything past ~1200 km overruns the
+ * API limit and the whole analysis 422s. Even a 2700 km route keeps a point
+ * every ~500 m after thinning, which is far finer than the coverage buffers.
+ *
+ * @param {number[][]} coords
+ * @param {number} max
+ * @returns {number[][]}
+ */
+export function thinGeometry(coords, max = MAX_GEOMETRY_POINTS) {
+    if (!Array.isArray(coords) || coords.length <= max) return coords;
+    const stride = Math.ceil((coords.length - 1) / (max - 1));
+    const out = [];
+    for (let i = 0; i < coords.length; i += stride) out.push(coords[i]);
+    const last = coords[coords.length - 1];
+    if (out[out.length - 1] !== last) out.push(last);
+    return out;
+}
+
 /**
  * @param {{
  *   fromLabel: string,
@@ -43,7 +67,8 @@ export async function analyzeJourney(q) {
             from_label: q.fromLabel,
             to_label: q.toLabel,
             departure: q.departure,
-            geometry: q.geometry,
+            geometry: thinGeometry(q.geometry),
+            // Distance stays the router's own figure, not the thinned polyline.
             distance_km: q.distanceKm,
         }),
     });
