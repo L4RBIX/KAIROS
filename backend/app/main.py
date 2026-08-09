@@ -349,6 +349,8 @@ async def copilot(req: CopilotRequest) -> CopilotResponse:
                 {
                     "time": pt["time"],
                     "risk": pt["risk"],
+                    "raw_model_risk": pt.get("raw_model_risk", pt["risk"]),
+                    "applicability": pt.get("applicability"),
                     "wind_speed": pt["wind_speed"],
                     "snowfall": pt["snowfall"],
                     "visibility": pt["visibility"],
@@ -357,11 +359,20 @@ async def copilot(req: CopilotRequest) -> CopilotResponse:
             )
 
     context = {
+        "mode": req.mode,
         "segment_id": stored["segment_id"],
         "segment_label": stored.get("segment_label") or req.segment_label or req.segment_id,
         "departure": req.departure,
         "risk": stored["risk"],
+        "raw_model_risk": stored.get("raw_model_risk", stored["risk"]),
         "risk_label": stored["risk_label"],
+        "applicability": stored.get("applicability")
+        or seasonal.get("applicability")
+        or ("active" if seasonal.get("winter_hazard_active", True) else "inactive"),
+        "applicability_reason": stored.get("applicability_reason")
+        or seasonal.get("applicability_reason")
+        or seasonal.get("reason")
+        or "",
         "wind_speed": stored["wind_speed"],
         "wind_gusts": stored.get("wind_gusts"),
         "snowfall": stored["snowfall"],
@@ -373,7 +384,11 @@ async def copilot(req: CopilotRequest) -> CopilotResponse:
         "seasonal": seasonal,
         "medium_risk_threshold": stored.get("medium_risk_threshold"),
         "high_risk_threshold": stored.get("high_risk_threshold"),
-        "score_note": "Model output is a risk score, not a calibrated probability.",
+        "score_note": (
+            "risk is actionable winter risk after the physical applicability gate; "
+            "raw_model_risk is the LightGBM score retained for diagnostics. "
+            "Neither is a calibrated probability."
+        ),
     }
 
     if not copilot_mod.deepseek_configured():

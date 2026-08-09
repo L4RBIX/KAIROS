@@ -89,6 +89,8 @@ export class Shell {
         /** @type {Array<{role:string,text:string,available?:boolean}>} */
         this._chat = [];
         this.setView("form");
+        /** @type {"live"|"winter_demo"} */
+        this._productMode = "live";
 
         /** @type {((r: {segmentId:string, label:string, departure:string}) => void)|null} */
         this.onAnalyze = null;
@@ -281,23 +283,26 @@ export class Shell {
      */
     _paintPrediction(p) {
         const e = this.el;
-        const calm = p.winterHazardActive === false;
+        const calm =
+            p.applicability === "inactive" || p.winterHazardActive === false;
 
         e.pct.textContent = Math.round(p.risk * 100) + "%";
         e.band.textContent = calm
-            ? "model score · winter hazard inactive"
+            ? "low risk"
             : `${p.riskLabel} closure risk`;
         e.headline.textContent = p.headline;
         // Keep the result view short; long explanations live in Copilot.
         e.detail.textContent = calm
-            ? (p.seasonalReason || "No snow or freezing conditions in the current forecast.")
+            ? (p.applicabilityReason ||
+                p.seasonalReason ||
+                "Current conditions do not indicate snow, ice or blizzard-related road restrictions.")
             : p.detail;
         e.result.dataset.band = calm ? "calm" : p.riskLabel;
         e.result.dataset.season = calm ? "live-calm" : "winter";
 
         if (e.liveBadge) {
             e.liveBadge.hidden = !calm;
-            e.liveBadge.textContent = "Live conditions · winter hazard inactive";
+            e.liveBadge.textContent = "Live conditions · current weather";
         }
 
         if (e.metWind) {
@@ -309,17 +314,20 @@ export class Shell {
 
         if (e.winterCta) {
             e.winterCta.hidden = !calm;
+            e.winterCta.textContent = "Experience winter scenario";
         }
         // One winter entry point when live is calm — avoid duplicate CTAs.
         if (this.replayEl.start) {
             this.replayEl.start.hidden = !!calm;
+            this.replayEl.start.textContent = "Experience winter scenario";
         }
 
         if (e.scoreNote) {
-            if (calm && p.oodCaution && p.risk >= 0.28) {
+            const raw = Number(p.rawModelRisk ?? 0);
+            if (calm && raw >= 0.28) {
                 e.scoreNote.hidden = false;
                 e.scoreNote.textContent =
-                    "Elevated model scores in non-winter weather may be out-of-distribution — not a calibrated probability.";
+                    `Raw model score ${Math.round(raw * 100)}% retained for diagnostics — not surfaced as actionable winter risk.`;
             } else {
                 e.scoreNote.hidden = true;
             }
@@ -476,20 +484,28 @@ export class Shell {
 
 Shell.prototype.enterReplay = function (rec, markFraction) {
     this.setCopilotBusy(false);
+    this._productMode = "winter_demo";
     this.setView("replay");
     this.replayEl.date.textContent =
-        `Illustrative winter scenario · ${rec.route.from} → ${rec.route.to} · ${rec.label}`;
+        `Winter scenario · illustrative demo · ${rec.route.from} → ${rec.route.to} · ${rec.label}`;
     this.replayEl.verdict.classList.remove("b-shown");
     this.replayEl.panel.dataset.band = "low";
     this.replayEl.mark.dataset.on = "0";
     this.replayEl.mark.style.left = (markFraction * 100).toFixed(2) + "%";
-    this.setStatus(`Illustrative winter scenario · ${rec.label}`);
+    this.setStatus(`Winter scenario · illustrative demo · ${rec.label}`);
 };
 
 Shell.prototype.exitReplay = function () {
+    this._productMode = "live";
     this.setView("form");
     this.setBusy(false);
     this.setStatus("Kazakhstan · winter road network");
+};
+
+Shell.prototype.getProductMode = function () {
+    return this._productMode === "winter_demo" || this._view === "replay"
+        ? "winter_demo"
+        : "live";
 };
 
 Shell.prototype.updateReplay = function (s) {
@@ -707,10 +723,10 @@ const MARKUP = `
             <button class="b-back" id="b-why" type="button">Why this risk?</button>
             <button class="b-back" id="b-ask" type="button">Ask KAIROS</button>
             <button class="b-back" id="b-back" type="button">Change route</button>
-            <button class="b-back" id="b-replay-start" type="button">Illustrative winter scenario</button>
+            <button class="b-back" id="b-replay-start" type="button">Experience winter scenario</button>
         </div>
         <button class="b-winter-cta" id="b-winter-cta" type="button" hidden>
-            See KAIROS in winter conditions
+            Experience winter scenario
         </button>
     </div>
 
@@ -766,7 +782,7 @@ const MARKUP = `
         </div>
         <div class="b-rp-note" id="b-rp-note"></div>
         <div class="b-rp-verdict" id="b-rp-verdict"></div>
-        <button class="b-back" id="b-replay-exit">Exit scenario</button>
+        <button class="b-back" id="b-replay-exit">Return to live conditions</button>
     </div>
 </section>
 

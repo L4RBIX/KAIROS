@@ -3,6 +3,7 @@
  *
  * One HTTP round-trip per Analyse fetches the day's risk curve. The departure
  * scrubber then calls `evaluateLocal` synchronously and never hits the network.
+ * Curve `risk` values are already applicability-gated (effective risk).
  */
 
 const API_BASE = (import.meta.env.VITE_ML_API_URL || "").replace(/\/$/, "");
@@ -21,11 +22,13 @@ export const DEFAULT_SEGMENTS = [
 /** @type {null | {
  *   segmentId: string,
  *   label: string,
- *   curve: Array<{time:string,risk:number,wind_speed:number,snowfall:number,visibility:number,temperature:number}>,
+ *   curve: Array<any>,
  *   meta: { medium_risk_threshold?: number, high_risk_threshold?: number },
  *   seasonal?: any,
  *   assessment?: any,
  *   wind_gusts?: number,
+ *   raw_model_risk?: number,
+ *   applicability?: string,
  * }} */
 let cached = null;
 
@@ -114,7 +117,18 @@ export function evaluateLocal(query) {
     const t = hi === lo ? 0 : (mins - lo.m) / span;
     const lerp = (a, b) => a + (b - a) * t;
 
+    // Effective risk is already gated per curve point on the server.
     const risk = lerp(lo.risk, hi.risk);
+    const raw_model_risk = lerp(
+        lo.raw_model_risk ?? lo.risk,
+        hi.raw_model_risk ?? hi.risk,
+    );
+    const nearer = t < 0.5 ? lo : hi;
+    const applicability =
+        nearer.applicability ||
+        (nearer.winter_hazard_active === false ? "inactive" : "active");
+    const winter = applicability !== "inactive";
+
     const medium = cached.meta?.medium_risk_threshold ?? 0.28399814979606014;
     const high = cached.meta?.high_risk_threshold ?? 0.516360272356473;
     let risk_label = "low";
@@ -125,12 +139,6 @@ export function evaluateLocal(query) {
     const snowfall = lerp(lo.snowfall, hi.snowfall);
     const visibility = lerp(lo.visibility, hi.visibility);
     const temperature = lerp(lo.temperature, hi.temperature);
-    const seasonal = cached.seasonal || {
-        winter_hazard_active: true,
-        seasonal_context: "unknown",
-        reason: "",
-        ood_caution: false,
-    };
 
     let recommended_departure = "";
     if (risk >= high) {
@@ -143,14 +151,17 @@ export function evaluateLocal(query) {
         if (lastSafe) recommended_departure = lastSafe.time;
     }
 
-    const winter = !!seasonal.winter_hazard_active;
+    const reason =
+        nearer.applicability_reason ||
+        cached.seasonal?.reason ||
+        "No active winter-weather hazard indicators.";
+
     let headline;
     let detail;
     if (!winter) {
-        headline = "Winter hazard inactive under current conditions.";
+        headline = "No active winter-weather hazard detected.";
         detail =
-            (seasonal.reason || "No snow or freezing conditions in the current forecast.") +
-            ` Live weather along the corridor. Model score ${Math.round(risk * 100)}%.`;
+            "Current conditions do not indicate snow, ice or blizzard-related road restrictions.";
     } else if (risk_label === "high") {
         headline = "High risk of closure or restriction.";
         detail = `KAIROS risk score ${Math.round(risk * 100)}%. Wind ${wind_speed.toFixed(0)} m/s, snowfall ${snowfall.toFixed(1)} mm/h, visibility ~${Math.round(visibility)} m.`;
@@ -162,9 +173,20 @@ export function evaluateLocal(query) {
         detail = `KAIROS risk score ${Math.round(risk * 100)}%. Live weather along the selected corridor.`;
     }
 
+    const seasonal = {
+        ...(cached.seasonal || {}),
+        winter_hazard_active: winter,
+        applicability,
+        applicability_reason: reason,
+        reason,
+    };
+
     return {
         risk,
+        raw_model_risk,
         risk_label,
+        applicability,
+        applicability_reason: reason,
         wind_speed,
         wind_gusts: cached.wind_gusts ?? wind_speed,
         snowfall,
@@ -206,6 +228,8 @@ export async function predict(query) {
         seasonal: raw.seasonal,
         assessment: raw.assessment,
         wind_gusts: raw.wind_gusts,
+        raw_model_risk: raw.raw_model_risk,
+        applicability: raw.applicability,
     };
     mlStatus = "live";
 

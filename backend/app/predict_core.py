@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 
 import pandas as pd
 
+from .applicability import assess_physical_applicability, effective_risk
 from .assessment import build_assessment
 from .config import CURVE_HOUR_END, CURVE_HOUR_START
 from .copy import risk_copy
@@ -18,7 +19,6 @@ from .features import (
 )
 from .model_runtime import ModelRuntime, Segment, get_runtime
 from .schemas import AssessmentOut, CurvePoint, PredictResponse, SeasonalState
-from .seasonal import assess_winter_hazard
 from .weather import fetch_hourly_weather
 
 
@@ -33,6 +33,7 @@ def _recommended_departure(
     high_threshold: float,
     requested_risk: float,
 ) -> str:
+    """Uses effective (gated) curve risks — never raw summer scores alone."""
     if requested_risk < high_threshold:
         return ""
     dep_h, dep_m = _parse_hhmm(departure)
@@ -53,6 +54,21 @@ def _recommended_departure(
     if last_safe_i is None:
         return ""
     return prior[last_safe_i].time
+
+
+def _row_applicability(row: pd.Series) -> dict:
+    wind = float(row["wind_speed_10m"]) if pd.notna(row["wind_speed_10m"]) else 0.0
+    gust = float(row["wind_gusts_10m"]) if pd.notna(row["wind_gusts_10m"]) else wind
+    return assess_physical_applicability(
+        temperature=float(row["temperature_2m"]) if pd.notna(row["temperature_2m"]) else 0.0,
+        snowfall=float(row["snowfall"]) if pd.notna(row["snowfall"]) else 0.0,
+        snow_depth=float(row["snow_depth"]) if pd.notna(row["snow_depth"]) else 0.0,
+        visibility=float(row["visibility"]) if pd.notna(row["visibility"]) else 0.0,
+        precipitation=float(row["precipitation"]) if pd.notna(row["precipitation"]) else 0.0,
+        snowfall_sum_24h=float(row["snowfall_sum_24h"]) if pd.notna(row["snowfall_sum_24h"]) else 0.0,
+        wind_speed=wind,
+        wind_gusts=gust,
+    )
 
 
 async def predict_segment(segment_id: str, departure: str) -> PredictResponse:
@@ -82,16 +98,22 @@ async def _predict_for_segment(
         ts = datetime(day.year, day.month, day.day, hour, 0, tzinfo=tz)
         idx = nearest_hour_index(engineered, pd.Timestamp(ts))
         feats = feature_row_at(engineered, idx, rt.features)
-        score = rt.predict_score(feats)
+        raw_score = rt.predict_score(feats)
         row = engineered.iloc[idx]
+        app = _row_applicability(row)
+        eff = effective_risk(raw_score, app["applicability"])
         curve.append(
             CurvePoint(
                 time=f"{hour:02d}:00",
-                risk=score,
+                risk=eff,
+                raw_model_risk=raw_score,
                 wind_speed=float(row["wind_speed_10m"]) if pd.notna(row["wind_speed_10m"]) else 0.0,
                 snowfall=float(row["snowfall"]) if pd.notna(row["snowfall"]) else 0.0,
                 visibility=float(row["visibility"]) if pd.notna(row["visibility"]) else 0.0,
                 temperature=float(row["temperature_2m"]) if pd.notna(row["temperature_2m"]) else 0.0,
+                applicability=app["applicability"],
+                applicability_reason=app["applicability_reason"],
+                winter_hazard_active=app["winter_hazard_active"],
             )
         )
 
@@ -99,49 +121,36 @@ async def _predict_for_segment(
     dep_ts = datetime(day.year, day.month, day.day, dh, dm, tzinfo=tz)
     dep_idx = nearest_hour_index(engineered, pd.Timestamp(dep_ts))
     dep_feats = feature_row_at(engineered, dep_idx, rt.features)
-    risk = rt.predict_score(dep_feats)
+    raw_risk = rt.predict_score(dep_feats)
     dep_row = engineered.iloc[dep_idx]
     wind = float(dep_row["wind_speed_10m"]) if pd.notna(dep_row["wind_speed_10m"]) else 0.0
     gust = float(dep_row["wind_gusts_10m"]) if pd.notna(dep_row["wind_gusts_10m"]) else wind
     snow = float(dep_row["snowfall"]) if pd.notna(dep_row["snowfall"]) else 0.0
     vis = float(dep_row["visibility"]) if pd.notna(dep_row["visibility"]) else 0.0
     temp = float(dep_row["temperature_2m"]) if pd.notna(dep_row["temperature_2m"]) else 0.0
-    snow_depth = float(dep_row["snow_depth"]) if pd.notna(dep_row["snow_depth"]) else 0.0
-    precip = float(dep_row["precipitation"]) if pd.notna(dep_row["precipitation"]) else 0.0
-    snow_24 = float(dep_row["snowfall_sum_24h"]) if pd.notna(dep_row["snowfall_sum_24h"]) else 0.0
 
-    seasonal_raw = assess_winter_hazard(
-        temperature=temp,
-        snowfall=snow,
-        snow_depth=snow_depth,
-        visibility=vis,
-        precipitation=precip,
-        snowfall_sum_24h=snow_24,
-    )
-    seasonal = SeasonalState(**seasonal_raw)
+    app_raw = _row_applicability(dep_row)
+    seasonal = SeasonalState(**app_raw)
+    risk = effective_risk(raw_risk, app_raw["applicability"])
     label = rt.risk_label(risk)
     recommended = _recommended_departure(curve, departure, rt.high_threshold, risk)
-    headline, detail = risk_copy(
-        label,
-        wind_speed=wind,
-        wind_gusts=gust,
-        snowfall=snow,
-        visibility=vis,
-        recommended_departure=recommended,
-    )
-    if not seasonal.winter_hazard_active:
-        headline = "Winter hazard inactive under current conditions."
+
+    if app_raw["applicability"] == "inactive":
+        headline = "No active winter-weather hazard detected."
         detail = (
-            f"{seasonal.reason} Live weather: wind {wind:.0f} m/s, "
-            f"snowfall {snow:.1f} mm/h, visibility ~{vis / 1000:.0f} km, "
-            f"{temp:.0f}°C. KAIROS model score remains {round(risk * 100)}% "
-            f"(risk score, not a calibrated probability)."
+            "Current conditions do not indicate snow, ice or blizzard-related "
+            "road restrictions. Live weather is connected; KAIROS keeps the "
+            "scene calm on purpose."
         )
-        if seasonal.ood_caution and risk >= rt.medium_threshold:
-            detail += (
-                " Elevated model scores during non-winter weather may reflect "
-                "out-of-distribution behaviour."
-            )
+    else:
+        headline, detail = risk_copy(
+            label,
+            wind_speed=wind,
+            wind_gusts=gust,
+            snowfall=snow,
+            visibility=vis,
+            recommended_departure=recommended,
+        )
 
     assessment = AssessmentOut(
         **build_assessment(
@@ -163,7 +172,10 @@ async def _predict_for_segment(
     return PredictResponse(
         segment_id=seg.segment_id,
         risk=risk,
+        raw_model_risk=raw_risk,
         risk_label=label,  # type: ignore[arg-type]
+        applicability=app_raw["applicability"],
+        applicability_reason=app_raw["applicability_reason"],
         wind_speed=wind,
         wind_gusts=gust,
         snowfall=snow,

@@ -172,6 +172,7 @@ export class RouteFlow {
                 profile,
                 compareTimes,
                 segmentLabel: this.route.label,
+                mode: this.shell.getProductMode?.() || "live",
             });
             this.shell.appendCopilotMessage("assistant", res.answer, {
                 available: res.available !== false,

@@ -36,6 +36,9 @@ import * as real from "./realPredictionService.js";
  *   headline: string,
  *   detail: string,
  *   source?: string,
+ *   rawModelRisk?: number,
+ *   applicability?: "active"|"inactive"|string,
+ *   applicabilityReason?: string,
  *   winterHazardActive?: boolean,
  *   seasonalContext?: string,
  *   seasonalReason?: string,
@@ -61,9 +64,27 @@ export let predictionMode = "unknown";
 export function normalise(raw) {
     const seasonal = raw.seasonal || {};
     const assessment = raw.assessment || null;
+    const applicability =
+        raw.applicability ??
+        seasonal.applicability ??
+        (seasonal.winter_hazard_active === false ||
+        raw.winterHazardActive === false ||
+        raw.winter_hazard_active === false
+            ? "inactive"
+            : "active");
     return {
         risk: Number(raw.risk) || 0,
+        rawModelRisk: Number(
+            raw.raw_model_risk ?? raw.rawModelRisk ?? raw.risk,
+        ) || 0,
         riskLabel: raw.risk_label ?? raw.riskLabel ?? "",
+        applicability,
+        applicabilityReason:
+            raw.applicability_reason ??
+            seasonal.applicability_reason ??
+            seasonal.reason ??
+            raw.applicabilityReason ??
+            "",
         windSpeed: Number(raw.wind_speed ?? raw.windSpeed) || 0,
         windGusts: Number(raw.wind_gusts ?? raw.windGusts ?? raw.wind_speed ?? raw.windSpeed) || 0,
         snowfall: Number(raw.snowfall) || 0,
@@ -77,7 +98,8 @@ export function normalise(raw) {
         winterHazardActive:
             seasonal.winter_hazard_active ??
             raw.winterHazardActive ??
-            raw.winter_hazard_active,
+            raw.winter_hazard_active ??
+            applicability !== "inactive",
         seasonalContext:
             seasonal.seasonal_context ??
             raw.seasonalContext ??

@@ -16,6 +16,7 @@ const API_BASE = (import.meta.env.VITE_ML_API_URL || "").replace(/\/$/, "");
  *   profile?: "car"|"truck"|"family",
  *   compareTimes?: string[],
  *   segmentLabel?: string,
+ *   mode?: "live"|"winter_demo",
  * }} req
  */
 export async function askCopilot(req) {
@@ -37,6 +38,7 @@ export async function askCopilot(req) {
                 profile: req.profile || "car",
                 compare_times: req.compareTimes || [],
                 segment_label: req.segmentLabel || undefined,
+                mode: req.mode || "live",
             }),
         });
         if (!res.ok) {

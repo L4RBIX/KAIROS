@@ -45,21 +45,21 @@ def quick_prompts(risk_label: str, winter_hazard_active: bool, locale: str = "en
         table = {
             "en": [
                 "Summarize current conditions",
-                "Why is there no winter hazard?",
-                "What does the model score mean in summer?",
-                "When should I use winter replay?",
+                "Why is actionable winter risk 0%?",
+                "What is the raw model score?",
+                "Show me the winter scenario",
             ],
             "ru": [
                 "Кратко опиши текущие условия",
-                "Почему зимняя угроза неактивна?",
-                "Что значит оценка модели летом?",
-                "Когда смотреть зимной сценарий?",
+                "Почему действующий зимний риск 0%?",
+                "Что такое сырой score модели?",
+                "Покажи зимный сценарий",
             ],
             "kk": [
                 "Қазіргі жағдайды қысқаша айт",
-                "Неге қысқы қауіп белсенді емес?",
-                "Жазда модель бағасы нені білдіреді?",
-                "Қысқы сценарийді қашан көру керек?",
+                "Неге әрекетті қысқы қауіп 0%?",
+                "Шикі модель бағасы не?",
+                "Қысқы сценарийді көрсет",
             ],
         }
         return table.get(locale, table["en"])

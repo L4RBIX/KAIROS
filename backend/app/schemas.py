@@ -26,10 +26,14 @@ class PredictRequest(BaseModel):
 class CurvePoint(BaseModel):
     time: str
     risk: float
+    raw_model_risk: float = 0.0
     wind_speed: float
     snowfall: float
     visibility: float
     temperature: float
+    applicability: Literal["active", "inactive"] = "active"
+    applicability_reason: str = ""
+    winter_hazard_active: bool = True
 
 
 class SeasonalState(BaseModel):
@@ -37,6 +41,8 @@ class SeasonalState(BaseModel):
     seasonal_context: str
     reason: str
     ood_caution: bool = False
+    applicability: Literal["active", "inactive"] = "active"
+    applicability_reason: str = ""
 
 
 class AssessmentOut(BaseModel):
@@ -53,7 +59,10 @@ class AssessmentOut(BaseModel):
 class PredictResponse(BaseModel):
     segment_id: str
     risk: float
+    raw_model_risk: float = 0.0
     risk_label: Literal["low", "moderate", "high"]
+    applicability: Literal["active", "inactive"] = "active"
+    applicability_reason: str = ""
     wind_speed: float
     wind_gusts: float
     snowfall: float
@@ -160,6 +169,7 @@ class CopilotRequest(BaseModel):
     profile: Literal["car", "truck", "family"] = "car"
     compare_times: list[str] = Field(default_factory=list, max_length=4)
     segment_label: Optional[str] = None
+    mode: Literal["live", "winter_demo"] = "live"
 
     @field_validator("departure")
     @classmethod
