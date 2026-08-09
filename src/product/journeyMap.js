@@ -154,6 +154,76 @@ const CSS = `
     letter-spacing: 0.2em; text-transform: uppercase; padding: 0 0 6px; cursor: pointer;
 }
 .jm-winter:hover { color: #e8f0f8; }
+
+@media (max-width: 620px) {
+    #kairos-map {
+        padding:
+            env(safe-area-inset-top, 0px)
+            env(safe-area-inset-right, 0px)
+            env(safe-area-inset-bottom, 0px)
+            env(safe-area-inset-left, 0px);
+    }
+    /* Bottom sheet planner — keep the map readable above. */
+    .jm-ui {
+        left: 0; right: 0; top: auto; bottom: 0;
+        width: 100%;
+        max-height: min(62vh, 560px);
+        gap: 10px;
+        padding: 0 14px calc(10px + env(safe-area-inset-bottom, 0px));
+        background: linear-gradient(180deg,
+            rgba(5, 9, 15, 0) 0%,
+            rgba(5, 9, 15, 0.72) 12%,
+            rgba(5, 9, 15, 0.94) 28%);
+    }
+    .jm-top {
+        padding-top: 10px;
+        align-items: center;
+    }
+    .jm-brand {
+        letter-spacing: 0.36em;
+        text-indent: 0.36em;
+    }
+    .jm-close {
+        letter-spacing: 0.14em;
+        min-height: 44px;
+    }
+    .jm-card {
+        max-height: none;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        background: rgba(5, 9, 15, 0.92);
+        border-bottom: 0;
+        border-top: 1px solid rgba(232, 240, 248, 0.16);
+        padding: 14px 12px 18px;
+        border-radius: 0;
+    }
+    .jm-fields { gap: 12px; margin: 12px 0; }
+    .jm-field select, .jm-field input[type="time"] {
+        font-size: 16px; /* iOS zoom guard */
+        min-height: 40px;
+    }
+    .jm-go, .jm-explore {
+        min-height: 48px;
+        letter-spacing: 0.18em;
+    }
+    .jm-legend {
+        letter-spacing: 0.1em;
+        line-height: 1.55;
+    }
+    .jm-meta { gap: 12px; }
+    .jm-chip {
+        min-height: 40px;
+        letter-spacing: 0.1em;
+    }
+    #kairos-map .maplibregl-ctrl-bottom-right {
+        bottom: calc(min(62vh, 560px) + 8px);
+        right: 10px;
+    }
+    #kairos-map .maplibregl-ctrl-attrib {
+        margin: 0 8px 4px;
+        max-width: 55vw;
+    }
+}
 `;
 
 function formatIntelHtml(text) {

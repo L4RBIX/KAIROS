@@ -748,7 +748,7 @@ const MARKUP = `
         <p class="b-cp-status" id="b-cp-status" data-busy="0"></p>
         <div class="b-cp-input-row">
             <input id="b-cp-input" type="text" maxlength="600"
-                   placeholder="Ask about this departure…" autocomplete="off" />
+                   placeholder="Ask KAIROS…" autocomplete="off" />
             <button class="b-go b-cp-send" id="b-cp-send" type="button">Ask</button>
         </div>
         <button class="b-back b-cp-back" id="b-cp-back" type="button">Back to forecast</button>

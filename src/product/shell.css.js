@@ -38,11 +38,16 @@ export const CSS = `
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: clamp(22px, 3.4vw, 54px);
+    padding:
+        max(clamp(16px, 3.4vw, 54px), env(safe-area-inset-top, 0px))
+        max(clamp(16px, 3.4vw, 54px), env(safe-area-inset-right, 0px))
+        max(clamp(16px, 3.4vw, 54px), env(safe-area-inset-bottom, 0px))
+        max(clamp(16px, 3.4vw, 54px), env(safe-area-inset-left, 0px));
     pointer-events: none;
     color: var(--b-frost);
     font-family: ui-sans-serif, "Inter", "Segoe UI", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
     /* A scrim weighted to the lower left, where the type sits. Radial rather
        than linear so it never draws an edge across the sky.
        Sunlit snow exposes near white, and the type sits directly on it — at a
@@ -85,6 +90,8 @@ export const CSS = `
     text-transform: uppercase;
     color: var(--b-faint);
     font-variant-numeric: tabular-nums;
+    min-width: 0;
+    text-align: right;
 }
 
 /* ------------------------------------------------------------------- panel */
@@ -639,14 +646,6 @@ export const CSS = `
     .b-rise { opacity: 1; transform: none; }
 }
 
-@media (max-width: 620px) {
-    .b-lede { font-size: 30px; }
-    .b-fields { gap: 18px; }
-    .b-field select, .b-field input { min-width: 128px; font-size: 17px; }
-    .b-cp-tools { flex-direction: column; }
-    .b-cp-input-row { flex-direction: column; align-items: stretch; }
-}
-
 /* ---------------------------------------------------------- live / seasonal */
 
 .b-live {
@@ -931,4 +930,151 @@ export const CSS = `
 }
 .b-cp-input-row input:focus-visible { border-bottom-color: var(--b-accent); }
 .b-cp-send { padding: 12px 18px; }
+
+/* Mobile last — overrides desktop rules above. */
+@media (max-width: 620px) {
+    #boran {
+        justify-content: flex-start;
+        gap: 18px;
+        overflow: hidden;
+        background:
+            radial-gradient(120% 80% at 0% 100%, rgba(5, 9, 15, 0.94) 0%,
+                            rgba(5, 9, 15, 0.72) 38%, rgba(5, 9, 15, 0.18) 72%,
+                            rgba(5, 9, 15, 0) 100%),
+            linear-gradient(180deg, rgba(5, 9, 15, 0.55) 0%,
+                            rgba(5, 9, 15, 0.18) 28%, rgba(5, 9, 15, 0) 48%);
+    }
+
+    .b-top, .b-panel, .b-foot { pointer-events: auto; }
+
+    .b-top {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 8px 12px;
+        flex: 0 0 auto;
+    }
+    .b-mark {
+        letter-spacing: 0.36em;
+        text-indent: 0.36em;
+    }
+    .b-loc {
+        flex: 1 1 100%;
+        text-align: left;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        line-height: 1.45;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .b-panel {
+        max-width: 100%;
+        width: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-bottom: 8px;
+    }
+
+    .b-lede {
+        font-size: clamp(26px, 7.2vw, 34px);
+        margin-bottom: 22px;
+    }
+    .b-go {
+        width: 100%;
+        text-align: center;
+        padding: 16px 18px;
+    }
+    .b-text-link { margin-top: 14px; }
+    .b-fields { gap: 16px; margin-bottom: 22px; }
+    .b-field select, .b-field input { min-width: 0; width: 100%; font-size: 17px; }
+    .b-field-wide { flex: 1 1 100%; min-width: 0; }
+
+    .b-route {
+        letter-spacing: 0.14em;
+        line-height: 1.4;
+        margin-bottom: 12px;
+    }
+    .b-live {
+        letter-spacing: 0.14em;
+        line-height: 1.4;
+    }
+    .b-pct, .b-pct-soft {
+        font-size: clamp(52px, 15vw, 72px);
+        line-height: 0.9;
+    }
+    .b-band {
+        letter-spacing: 0.14em;
+        text-indent: 0;
+        line-height: 1.45;
+        margin-top: 10px;
+    }
+    .b-headline { font-size: 18px; margin-top: 16px; color: var(--b-frost); }
+    .b-detail { font-size: 13px; line-height: 1.5; margin-top: 10px; color: #c5d4e4; }
+    .b-score-note { font-size: 12px; line-height: 1.45; color: #c5d4e4; }
+    .b-mets {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 14px 16px;
+        max-width: none;
+    }
+    .b-scrub { margin-top: 18px; max-width: none; }
+    .b-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        margin-top: 8px;
+    }
+    .b-back, .b-winter-cta {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        letter-spacing: 0.16em;
+    }
+
+    .b-copilot {
+        max-width: 100%;
+        max-height: none;
+        padding-right: 0;
+    }
+    .b-cp-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    .b-cp-x { display: none; }
+    .b-cp-title {
+        font-size: 22px;
+        max-width: none;
+    }
+    .b-cp-summary, .b-cp-concerns, .b-cp-best {
+        color: #c5d4e4;
+        max-width: none;
+    }
+    .b-cp-best { color: var(--b-frost); }
+    .b-cp-tools { flex-direction: column; }
+    .b-cp-input-row { flex-direction: column; align-items: stretch; }
+    .b-cp-prompts { gap: 8px; }
+    .b-cp-prompts .b-cp-chip,
+    .b-cp-prompts button {
+        width: 100%;
+        text-align: left;
+        min-height: 44px;
+    }
+
+    .b-foot {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        letter-spacing: 0.12em;
+        line-height: 1.5;
+        margin-top: auto;
+        padding-top: 8px;
+        flex: 0 0 auto;
+    }
+    .b-panel:not([data-view="form"]) ~ .b-foot { display: none; }
+}
 `;
